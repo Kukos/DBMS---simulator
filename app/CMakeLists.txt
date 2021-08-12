@@ -6,3 +6,4 @@ add_executable(main.out ${APP_LIST})
 target_compile_definitions(main.out PRIVATE LOGGER_ACTIVE_LEVEL=2)
 
 target_link_libraries(main.out PRIVATE srccode spdlog::spdlog)
+target_include_directories(main.out PUBLIC ../include)
