@@ -32,6 +32,7 @@ MemoryController::MemoryController(const MemoryController& other)
     readCache = other.readCache;
     writeCache = other.writeCache;
     overwriteCache = other.overwriteCache;
+    counters = other.counters;
 }
 
 MemoryController& MemoryController::operator=(const MemoryController& other)
@@ -44,6 +45,7 @@ MemoryController& MemoryController::operator=(const MemoryController& other)
     readCache = other.readCache;
     writeCache = other.writeCache;
     overwriteCache = other.overwriteCache;
+    counters = other.counters;
     memoryModel.reset((*other.memoryModel).clone());
 
     return *this;
@@ -104,6 +106,11 @@ double MemoryController::flushCache() noexcept(true)
         {
             const double flushTime = memoryModel->writeBytes(bytesToWrite);
             LOGGER_LOG_TRACE("Write queue page{:d} broke memory area, writing {:d} bytes took {}s", i, bytesToWrite, flushTime);
+
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME, flushTime);
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS, 1);
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES, bytesToWrite);
+
             flushWriteTime += flushTime;
 
             // bytes reseted but here we need to start counting new page
@@ -114,6 +121,11 @@ double MemoryController::flushCache() noexcept(true)
     {
         const double flushTime = memoryModel->writeBytes(bytesToWrite);
         LOGGER_LOG_TRACE("Write queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushTime);
+
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME, flushTime);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS, 1);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES, bytesToWrite);
+
         flushWriteTime += flushTime;
     }
 
@@ -173,10 +185,20 @@ double MemoryController::flushCache() noexcept(true)
         }
         else // memory gap, need to write pages in Queue
         {
-            const double flushTime = memoryModel->readBytes(bytesToRead) + memoryModel->overwriteBytes(bytesToWrite);
+            const double flushReadTime = memoryModel->readBytes(bytesToRead);
+            const double flushWriteTime = memoryModel->overwriteBytes(bytesToWrite);
+            const double flushTime = flushReadTime + flushWriteTime;
             flushOverWriteTime += flushTime;
 
             LOGGER_LOG_TRACE("Overwrite queue page{:d} broke memory area, reading {:d} bytes, writing {:d} bytes took {}s", i, bytesToRead, bytesToWrite, flushTime);
+
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME, flushReadTime);
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 1);
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES, bytesToRead);
+
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME, flushWriteTime);
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS, 1);
+            counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES, bytesToWrite);
 
             // bytes reseted but here we need to start counting new page
             bytesToWrite = writeCacheLineSize;
@@ -185,19 +207,26 @@ double MemoryController::flushCache() noexcept(true)
 
     if (bytesToWrite > 0)
     {
-        double flushTime = memoryModel->overwriteBytes(bytesToWrite);
+        const double flushWriteTime = memoryModel->overwriteBytes(bytesToWrite);
+        flushOverWriteTime += flushWriteTime;
 
-        if (bytesToRead > 0)
-        {
-            flushTime += memoryModel->readBytes(bytesToRead);
-            LOGGER_LOG_TRACE("Overwrite queue writing last pages {:d} bytes, reading {:d} bytes took {}s",  bytesToWrite, bytesToRead, flushTime);
-        }
-        else
-        {
-            LOGGER_LOG_TRACE("Overwrite queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushTime);
-        }
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME, flushWriteTime);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS, 1);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES, bytesToWrite);
 
-        flushOverWriteTime += flushTime;
+        LOGGER_LOG_TRACE("Overwrite queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushWriteTime);
+    }
+
+    if (bytesToRead > 0)
+    {
+        const double flushReadTime = memoryModel->readBytes(bytesToRead);
+        flushOverWriteTime += flushReadTime;
+
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME, flushReadTime);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 1);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES, bytesToRead);
+
+        LOGGER_LOG_TRACE("Overwrite queue reading last pages {:d} bytes took {}s", bytesToRead, flushReadTime);
     }
 
     LOGGER_LOG_DEBUG("Overwrite queue flushed, took {}s", flushOverWriteTime);
@@ -224,6 +253,10 @@ double MemoryController::readBytes(uintptr_t addr, size_t bytes) noexcept(true)
     {
         const size_t bytesToRead = readQueue.size() * readCacheLineSize;
         double time = memoryModel->readBytes(bytesToRead);
+
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME, time);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 1);
+        counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES, bytesToRead);
 
         const std::string readQueueString = std::accumulate(std::begin(readQueue),
                                                             std::end(readQueue),
@@ -388,6 +421,7 @@ std::string MemoryController::toStringFull(bool oneLine) const noexcept(true)
                            std::string(" .readCache = ") + writeQueueString +
                            std::string(" .writeCache = ") + readQueueString +
                            std::string(" .overwriteCache = ") + overwriteQueueStringDebug +
+                           std::string(" .counters = ") + counters.toStringFull() +
                            std::string(" }"));
     else
         return std::string(std::string("MemoryController {\n") +
@@ -397,5 +431,31 @@ std::string MemoryController::toStringFull(bool oneLine) const noexcept(true)
                            std::string("\t.readCache = ") + writeQueueString + std::string("\n") +
                            std::string("\t.writeCache = ") + readQueueString + std::string("\n") +
                            std::string("\t.overwriteCache = ") + overwriteQueueStringDebug + std::string("\n") +
+                           std::string("\t.counters = ") + counters.toStringFull() + std::string("\n") +
                            std::string("}"));
+}
+
+std::pair<std::string, double> MemoryController::getCounter(enum MemoryCounters::MemoryCountersD counterId) const noexcept(true)
+{
+    return counters.getCounter(counterId);
+}
+
+std::pair<std::string, long> MemoryController::getCounter(enum MemoryCounters::MemoryCountersL counterId) const noexcept(true)
+{
+    return counters.getCounter(counterId);
+}
+
+void MemoryController::resetCounter(enum MemoryCounters::MemoryCountersL counterId) noexcept(true)
+{
+    counters.resetCounter(counterId);
+}
+
+void MemoryController::resetCounter(enum MemoryCounters::MemoryCountersD counterId) noexcept(true)
+{
+    counters.resetCounter(counterId);
+}
+
+void MemoryController::resetAllCounters() noexcept(true)
+{
+    counters.resetAllCounters();
 }

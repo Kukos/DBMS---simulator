@@ -23,6 +23,12 @@ GTEST_TEST(ssdControllerBasicTest, interface)
     EXPECT_EQ(controller.getBlockSize(), blockSize);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
 
+    for (auto id = MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME; id < MemoryCounters::MEMORY_COUNTER_D_MAX_ITERATOR; ++id)
+        EXPECT_DOUBLE_EQ(controller.getCounter(id).second, 0.0);
+
+    for (auto id = MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES; id < MemoryCounters::MEMORY_COUNTER_L_MAX_ITERATOR; ++id)
+        EXPECT_EQ(controller.getCounter(id).second, 0L);
+
     MemoryModel* generalMemory = new MemoryModelSSD_Samsung840();
     MemoryController generalController(generalMemory);
     EXPECT_EQ(std::string(generalController.getModelName()), std::string("SSD:samsung840"));
@@ -144,6 +150,10 @@ GTEST_TEST(ssdControllerBasicTest, singleRead)
     EXPECT_DOUBLE_EQ(controller.readBytes(addr, 0), 0.0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
+
     // Fetched pages: [0 - 0]
     EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), readRandomTime);
     EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), 0.0);
@@ -153,6 +163,10 @@ GTEST_TEST(ssdControllerBasicTest, singleRead)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readRandomTime);
 
     // Fetched pages: [1 - 1]
     addr = pageSize + 10;
@@ -165,6 +179,10 @@ GTEST_TEST(ssdControllerBasicTest, singleRead)
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (1 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 3.0 * readRandomTime);
+
     // Fetched pages: [10 - 11]
     addr = pageSize * 10;
     EXPECT_DOUBLE_EQ(controller.readBytes(addr, 4000), 2.0 * readRandomTime);
@@ -173,6 +191,10 @@ GTEST_TEST(ssdControllerBasicTest, singleRead)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (1 + 2 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 4);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 5.0 * readRandomTime);
 
     // Fetched pages: [4 - 102]
     addr = 10000;
@@ -183,6 +205,10 @@ GTEST_TEST(ssdControllerBasicTest, singleRead)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (1 + 2 + 2 + 99) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 5);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 5.0 * readRandomTime + 99.0 * readSeqTime);
 }
 
 GTEST_TEST(ssdControllerBasicTest, severalReads)
@@ -208,6 +234,10 @@ GTEST_TEST(ssdControllerBasicTest, severalReads)
     EXPECT_DOUBLE_EQ(controller.readBytes(addr + 1000, 100), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readRandomTime);
+
     // Fetched pages: {[0 - 0], [10 - 11]}
     addr = 10 * pageSize;
     EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), readRandomTime);
@@ -218,6 +248,10 @@ GTEST_TEST(ssdControllerBasicTest, severalReads)
     EXPECT_DOUBLE_EQ(controller.readBytes(addr + 1000, 100), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (1 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 3.0 * readRandomTime);
+
     // Fetched pages: {[0 - 0], [10 - 11], [7 - 7]}
     addr = 7 * pageSize;
     EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), readRandomTime);
@@ -226,6 +260,10 @@ GTEST_TEST(ssdControllerBasicTest, severalReads)
     EXPECT_DOUBLE_EQ(controller.readBytes(addr + 1000, 100), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (1 + 2 + 1) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 4);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 4.0 * readRandomTime);
+
     // 0 - 6 SEQ, 8 - 9 RANDOM
     // Fetched pages: {[0 - 0], [10 - 11], [7 - 7], [1 - 6], [8 - 9]}
     addr = 10;
@@ -233,7 +271,12 @@ GTEST_TEST(ssdControllerBasicTest, severalReads)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (1 + 2 + 1 + 8) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 6);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 6.0 * readRandomTime + 6.0 * readSeqTime);
 }
+
 
 GTEST_TEST(ssdControllerBasicTest, singleWrite)
 {
@@ -254,6 +297,10 @@ GTEST_TEST(ssdControllerBasicTest, singleWrite)
     EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 0), 0.0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 0.0);
+
     // Pages in write QUEUE: [0 - 0]
     EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 100), 0.0);
     EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 100), 0.0);
@@ -263,6 +310,10 @@ GTEST_TEST(ssdControllerBasicTest, singleWrite)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), writeRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1) * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, writeRandomTime);
 
     // Pages in write QUEUE: [1 - 1]
     addr = pageSize + 10;
@@ -275,6 +326,10 @@ GTEST_TEST(ssdControllerBasicTest, singleWrite)
     EXPECT_DOUBLE_EQ(controller.flushCache(), 2.0 * writeRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2) * pageSize);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, (1 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 2);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 3.0 * writeRandomTime);
+
     // Pages in write QUEUE: [10 - 11]
     addr = pageSize * 10;
     EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 4000), 0.0);
@@ -283,6 +338,10 @@ GTEST_TEST(ssdControllerBasicTest, singleWrite)
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2) * pageSize);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 2.0 * writeRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2 + 2) * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, (1 + 2 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 5.0 * writeRandomTime);
 
     // Pages in write QUEUE: [4 - 102]
     addr = 10000;
@@ -293,6 +352,10 @@ GTEST_TEST(ssdControllerBasicTest, singleWrite)
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2 + 2) * pageSize);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 99.0 * writeSeqTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2 + 2 + 99) * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, (1 + 2 + 2 + 99) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 4);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 5.0 * writeRandomTime + 99.0 * writeSeqTime);
 }
 
 GTEST_TEST(ssdControllerBasicTest, severalWrites)
@@ -342,6 +405,10 @@ GTEST_TEST(ssdControllerBasicTest, severalWrites)
     // Flush cost: 0 - 0, 10 - 11 as random SEQ, 5 - 8 SEQ
     EXPECT_DOUBLE_EQ(controller.flushCache(), 3.0 * writeRandomTime + 4.0 * writeSeqTime);
     EXPECT_EQ(controller.getMemoryWearOut(), 7 * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, 7 * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 3.0 * writeRandomTime + 4.0 * writeSeqTime);
 }
 
 GTEST_TEST(ssdControllerBasicTest, singleOverwrite)
@@ -363,6 +430,10 @@ GTEST_TEST(ssdControllerBasicTest, singleOverwrite)
     EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 0), 0.0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 0.0);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 0.0);
+
     // Pages in write QUEUE: [0 - 0]
     EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 100), 0.0);
     EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 100), 0.0);
@@ -372,6 +443,14 @@ GTEST_TEST(ssdControllerBasicTest, singleOverwrite)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), writeRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1) * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, writeRandomTime);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
 
     // Pages in write QUEUE: [1 - 1]
     addr = pageSize + 10;
@@ -384,6 +463,14 @@ GTEST_TEST(ssdControllerBasicTest, singleOverwrite)
     EXPECT_DOUBLE_EQ(controller.flushCache(), 2.0 * writeRandomTime + 2.0 * readRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2) * pageSize);
 
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, (1 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 2);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 3.0 * writeRandomTime);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 2 * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 2.0 * readRandomTime);
+
     // Pages in write QUEUE: [10 - 11]
     addr = pageSize * 10;
     EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 4000), 0.0);
@@ -392,6 +479,14 @@ GTEST_TEST(ssdControllerBasicTest, singleOverwrite)
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2) * pageSize);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 2.0 * writeRandomTime + readRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2 + 2) * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, (1 + 2 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 5.0 * writeRandomTime);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (2 + 1) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 3.0 * readRandomTime);
 
     // Pages in write QUEUE: [4 - 102]
     addr = 10000;
@@ -402,6 +497,14 @@ GTEST_TEST(ssdControllerBasicTest, singleOverwrite)
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2 + 2) * pageSize);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 99.0 * writeSeqTime + 3.0 * eraseTime + 2.0 * readRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), (1 + 2 + 2 + 99) * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, (1 + 2 + 2 + 99) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 4);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 5.0 * writeRandomTime + 99.0 * writeSeqTime +  + 3.0 * eraseTime);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, (2 + 1 + 2) * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 5.0 * readRandomTime);
 }
 
 GTEST_TEST(ssdControllerBasicTest, severalOverwrites)
@@ -451,6 +554,14 @@ GTEST_TEST(ssdControllerBasicTest, severalOverwrites)
     // Flush cost: 0 - 0, 10 - 11 as random SEQ, 5 - 8 SEQ
     EXPECT_DOUBLE_EQ(controller.flushCache(), 3.0 * writeRandomTime + 4.0 * writeSeqTime + 4.0 * readRandomTime);
     EXPECT_EQ(controller.getMemoryWearOut(), 7 * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, 7 * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 3.0 * writeRandomTime + 4.0 * writeSeqTime);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 4 * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 3);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 4.0 * readRandomTime);
 }
 
 GTEST_TEST(ssdControllerBasicTest, seqReadWhenOverwrite)
@@ -510,4 +621,12 @@ GTEST_TEST(ssdControllerBasicTest, seqReadWhenOverwrite)
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
     EXPECT_DOUBLE_EQ(controller.flushCache(), 5.0 * writeSeqTime + 5.0 * readSeqTime);
     EXPECT_EQ(controller.getMemoryWearOut(), 5 * pageSize);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 5 * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 5.0 * readSeqTime);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, 5 * pageSize);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 5.0 * writeSeqTime);
 }

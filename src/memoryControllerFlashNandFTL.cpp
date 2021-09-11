@@ -57,6 +57,7 @@ std::string MemoryControllerFlashNandFTL::toStringFull(bool oneLine) const noexc
                            std::string(" .readCache = ") + writeQueueString +
                            std::string(" .writeCache = ") + readQueueString +
                            std::string(" .overwriteCache = ") + overwriteQueueStringDebug +
+                           std::string(" .counters = ") + counters.toStringFull() +
                            std::string(" }"));
     else
         return std::string(std::string("MemoryControllerFlashNandFTL {\n") +
@@ -66,5 +67,6 @@ std::string MemoryControllerFlashNandFTL::toStringFull(bool oneLine) const noexc
                            std::string("\t.readCache = ") + writeQueueString + std::string("\n") +
                            std::string("\t.writeCache = ") + readQueueString + std::string("\n") +
                            std::string("\t.overwriteCache = ") + overwriteQueueStringDebug + std::string("\n") +
+                           std::string("\t.counters = ") + counters.toStringFull() + std::string("\n") +
                            std::string("}"));
 }

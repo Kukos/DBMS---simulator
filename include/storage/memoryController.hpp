@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <storage/memoryModel.hpp>
+#include <observability/memoryCounters.hpp>
 
 class MemoryController
 {
@@ -13,6 +14,7 @@ private:
     bool isAddrAlignedToCacheLine(uintptr_t addr, size_t cacheLineSize) const noexcept(true);
 
 protected:
+    MemoryCounters counters;
     std::unique_ptr<MemoryModel> memoryModel;
     size_t readCacheLineSize;
     size_t writeCacheLineSize;
@@ -126,6 +128,43 @@ public:
      * @return Full edscription of Memory Controller
      */
     virtual std::string toStringFull(bool oneLine = true) const noexcept(true);
+
+    /**
+     * @brief Get Counter as a pair
+     *
+     * @param[in] counterId - Counter ID
+     *
+     * @return Counter pair with name and value
+     */
+    std::pair<std::string, double> getCounter(enum MemoryCounters::MemoryCountersD counterId) const noexcept(true);
+
+    /**
+     * @brief Get Counter as a pair
+     *
+     * @param[in] counterId - Counter ID
+     *
+     * @return Counter pair with name and value
+     */
+    std::pair<std::string, long> getCounter(enum MemoryCounters::MemoryCountersL counterId) const noexcept(true);
+
+    /**
+     * @brief Reset counter
+     *
+     * @param[in] counterId - Counter ID
+     */
+    void resetCounter(enum MemoryCounters::MemoryCountersL counterId) noexcept(true);
+
+    /**
+     * @brief Reset counter
+     *
+     * @param[in] counterId - Counter ID
+     */
+    void resetCounter(enum MemoryCounters::MemoryCountersD counterId) noexcept(true);
+
+    /**
+     * @brief Reset all counters
+     */
+    void resetAllCounters() noexcept(true);
 
     MemoryController(MemoryModel* memoryModel);
     MemoryController(MemoryModel* memoryModel, size_t readCacheLineSize, size_t writeCacheLineSize);
