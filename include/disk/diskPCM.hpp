@@ -25,6 +25,16 @@ public:
      */
     virtual std::string toStringFull(bool oneLine = true) const noexcept(true) override;
 
+    /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new Disk
+    *
+    * @return new Disk
+    */
+    virtual Disk* clone() const noexcept(true) override
+    {
+        return new DiskPCM(*this);
+    }
+
     DiskPCM() = default;
     virtual ~DiskPCM() = default;
     DiskPCM(const DiskPCM&) = default;
@@ -40,6 +50,11 @@ public:
     : DiskPCM(new MemoryControllerPCM(new MemoryModelPCM_DefaultModel()))
     {
 
+    }
+
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskPCM_DefaultModel(*this);
     }
 
     ~DiskPCM_DefaultModel() = default;

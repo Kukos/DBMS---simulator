@@ -13,6 +13,16 @@ protected:
 
 public:
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new Disk
+    *
+    * @return new Disk
+    */
+    virtual Disk* clone() const noexcept(true)
+    {
+        return new Disk(*this);
+    }
+
+    /**
      * @brief Get Low Level MemoryController in read only access mode
      *        You can use this function to read controller counters, name and other features
      *

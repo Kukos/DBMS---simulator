@@ -10,6 +10,16 @@ public:
     DiskFlashNandFTL(MemoryControllerFlashNandFTL* controller);
 
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new Disk
+    *
+    * @return new Disk
+    */
+    virtual Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandFTL(*this);
+    }
+
+    /**
      * @brief Created brief snapshot of Disk as a string
      *
      * @param[in] oneLine - create string as 1 line or not? By default Yes
@@ -42,6 +52,12 @@ public:
 
     }
 
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandFTL_SamsungK9F1G08U0D(*this);
+    }
+
+
     ~DiskFlashNandFTL_SamsungK9F1G08U0D() = default;
     DiskFlashNandFTL_SamsungK9F1G08U0D(const DiskFlashNandFTL_SamsungK9F1G08U0D&) = default;
     DiskFlashNandFTL_SamsungK9F1G08U0D& operator=(const DiskFlashNandFTL_SamsungK9F1G08U0D&) = default;
@@ -58,6 +74,11 @@ public:
 
     }
 
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandFTL_MicronMT29F32G08ABAAA(*this);
+    }
+
     ~DiskFlashNandFTL_MicronMT29F32G08ABAAA() = default;
     DiskFlashNandFTL_MicronMT29F32G08ABAAA(const DiskFlashNandFTL_MicronMT29F32G08ABAAA&) = default;
     DiskFlashNandFTL_MicronMT29F32G08ABAAA& operator=(const DiskFlashNandFTL_MicronMT29F32G08ABAAA&) = default;
@@ -72,6 +93,11 @@ public:
     : DiskFlashNandFTL(new MemoryControllerFlashNandFTL(new MemoryModelFlashNandFTL_MicronMT29F32G08CBEDBL83A3WC1()))
     {
 
+    }
+
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandFTL_MicronMT29F32G08CBEDBL83A3WC1(*this);
     }
 
     ~DiskFlashNandFTL_MicronMT29F32G08CBEDBL83A3WC1() = default;

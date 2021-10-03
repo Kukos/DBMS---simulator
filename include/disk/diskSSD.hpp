@@ -10,6 +10,16 @@ public:
     DiskSSD(MemoryControllerSSD* controller);
 
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new Disk
+    *
+    * @return new Disk
+    */
+    virtual Disk* clone() const noexcept(true) override
+    {
+        return new DiskSSD(*this);
+    }
+
+    /**
      * @brief Created brief snapshot of Disk as a string
      *
      * @param[in] oneLine - create string as 1 line or not? By default Yes
@@ -42,6 +52,11 @@ public:
 
     }
 
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskSSD_Samsung840(*this);
+    }
+
     ~DiskSSD_Samsung840() = default;
     DiskSSD_Samsung840(const DiskSSD_Samsung840&) = default;
     DiskSSD_Samsung840& operator=(const DiskSSD_Samsung840&) = default;
@@ -58,6 +73,11 @@ public:
 
     }
 
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskSSD_IntelDCP4511(*this);
+    }
+
     ~DiskSSD_IntelDCP4511() = default;
     DiskSSD_IntelDCP4511(const DiskSSD_IntelDCP4511&) = default;
     DiskSSD_IntelDCP4511& operator=(const DiskSSD_IntelDCP4511&) = default;
@@ -72,6 +92,11 @@ public:
     : DiskSSD(new MemoryControllerSSD(new MemoryModelSSD_ToshibaVX500()))
     {
 
+    }
+
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskSSD_ToshibaVX500(*this);
     }
 
     ~DiskSSD_ToshibaVX500() = default;

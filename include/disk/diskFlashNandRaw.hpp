@@ -25,6 +25,15 @@ public:
      */
     virtual std::string toStringFull(bool oneLine = true) const noexcept(true) override;
 
+    /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new Disk
+    *
+    * @return new Disk
+    */
+    virtual Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandRaw(*this);
+    }
 
 
     DiskFlashNandRaw() = default;
@@ -44,6 +53,11 @@ public:
 
     }
 
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandRaw_SamsungK9F1G08U0D(*this);
+    }
+
     ~DiskFlashNandRaw_SamsungK9F1G08U0D() = default;
     DiskFlashNandRaw_SamsungK9F1G08U0D(const DiskFlashNandRaw_SamsungK9F1G08U0D&) = default;
     DiskFlashNandRaw_SamsungK9F1G08U0D& operator=(const DiskFlashNandRaw_SamsungK9F1G08U0D&) = default;
@@ -58,6 +72,11 @@ public:
     : DiskFlashNandRaw(new MemoryControllerFlashNandRaw(new MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA()))
     {
 
+    }
+
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandRaw_MicronMT29F32G08ABAAA(*this);
     }
 
     ~DiskFlashNandRaw_MicronMT29F32G08ABAAA() = default;
@@ -75,6 +94,12 @@ public:
     {
 
     }
+
+    Disk* clone() const noexcept(true) override
+    {
+        return new DiskFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1(*this);
+    }
+
 
     ~DiskFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1() = default;
     DiskFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1(const DiskFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1&) = default;
