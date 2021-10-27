@@ -45,6 +45,8 @@ endif()
 set(CMAKE_CXX_STANDARD 17) # -std=c++17
 set(CMAKE_CXX_EXTENSIONS OFF) # turn off gnu
 
+find_package(spdlog REQUIRED)
+
 # Workaround for missing cmake script in gmock / gtest repo
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 

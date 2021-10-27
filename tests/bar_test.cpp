@@ -1,5 +1,6 @@
 #include <bar.hpp>
 #include <gtest/gtest.h>
+#include <spdlog/spdlog.h>
 
 GTEST_TEST(barTestSuite1, barTest1)
 {
