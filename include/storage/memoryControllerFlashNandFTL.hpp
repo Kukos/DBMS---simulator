@@ -9,6 +9,11 @@ class MemoryControllerFlashNandFTL : public MemoryController
 public:
     MemoryControllerFlashNandFTL(MemoryModelFlashNandFTL* flash);
 
+    MemoryController* clone() const noexcept(true) override
+    {
+        return new MemoryControllerFlashNandFTL(*this);
+    }
+
     /**
      * @brief Created brief snapshot of Memory Controller as a string
      *

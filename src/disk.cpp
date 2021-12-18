@@ -120,3 +120,20 @@ Disk::Disk(MemoryController* controller)
 {
     LOGGER_LOG_DEBUG("Disk created: {}", toStringFull());
 }
+
+Disk::Disk(const Disk& other)
+: Disk((*other.memoryController).clone())
+{
+    diskCounters = other.diskCounters;
+}
+
+Disk& Disk::operator=(const Disk& other)
+{
+    if (this == &other)
+        return *this;
+
+    diskCounters = other.diskCounters;
+    memoryController.reset((*other.memoryController).clone());
+
+    return *this;
+}

@@ -122,8 +122,10 @@ public:
 
     virtual ~Disk() = default;
     Disk() = default;
-    Disk(const Disk&) = default;
-    Disk& operator=(const Disk&) = default;
+
+    Disk(const Disk&);
+    Disk& operator=(const Disk&);
+
     Disk(Disk &&) = default;
     Disk& operator=(Disk &&) = default;
 };

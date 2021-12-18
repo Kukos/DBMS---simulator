@@ -9,6 +9,11 @@ class MemoryControllerFlashNandRaw : public MemoryController
 public:
     MemoryControllerFlashNandRaw(MemoryModelFlashNandRaw* flash);
 
+    MemoryController* clone() const noexcept(true) override
+    {
+        return new MemoryControllerFlashNandRaw(*this);
+    }
+
     /**
      * @brief Created brief snapshot of Memory Controller as a string
      *

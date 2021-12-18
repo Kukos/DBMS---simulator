@@ -26,6 +26,16 @@ protected:
 
 public:
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new MemoryController
+    *
+    * @return new MemoryController
+    */
+    virtual MemoryController* clone() const noexcept(true)
+    {
+        return new MemoryController(*this);
+    }
+
+    /**
      * @brief Get memory model name
      *
      * @return Memory Model Name as const char*

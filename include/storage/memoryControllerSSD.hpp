@@ -9,6 +9,11 @@ class MemoryControllerSSD : public MemoryController
 public:
     MemoryControllerSSD(MemoryModelSSD* ssd);
 
+    MemoryController* clone() const noexcept(true) override
+    {
+        return new MemoryControllerSSD(*this);
+    }
+
     /**
      * @brief Created brief snapshot of Memory Controller as a string
      *

@@ -36,6 +36,11 @@ public:
 
     }
 
+    MemoryController* clone() const noexcept(true) override
+    {
+        return new MemoryControllerTest(*this);
+    }
+
     double flushCache() noexcept(true)
     {
         const double writeTime = writeQueueSize * this->writeTime;
@@ -119,6 +124,92 @@ GTEST_TEST(generalDiskBasicTest, interface)
 
     for (auto id = MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES; id < MemoryCounters::MEMORY_COUNTER_L_MAX_ITERATOR; ++id)
         EXPECT_EQ(disk.getDiskCounter(id).second, 0L);
+}
+
+GTEST_TEST(generalDiskBasicTest, copy)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+    MemoryControllerTest* memoryController = new MemoryControllerTest(modelName, pageSize, readTime, writeTime);
+
+    Disk disk(memoryController);
+
+    uintptr_t addr = 0;
+
+    // cache is disabled in MemoryControllerTest class
+    EXPECT_DOUBLE_EQ(disk.readBytes(addr, 100), readTime);
+    EXPECT_DOUBLE_EQ(disk.readBytes(addr, 100), readTime);
+
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 200);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readTime * 2);
+
+    EXPECT_EQ(disk.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+
+    EXPECT_DOUBLE_EQ(disk.flushCache(), 0.0);
+
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 0.0);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 0.0);
+
+    Disk copy(disk);
+
+    EXPECT_EQ(copy.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_EQ(copy.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 200);
+    EXPECT_DOUBLE_EQ(copy.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readTime * 2);
+    EXPECT_EQ(copy.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+
+    Disk copy2;
+    copy2 = copy;
+
+    EXPECT_EQ(copy2.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_EQ(copy2.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 200);
+    EXPECT_DOUBLE_EQ(copy2.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readTime * 2);
+    EXPECT_EQ(copy2.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+}
+
+GTEST_TEST(generalDiskBasicTest, move)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+    MemoryControllerTest* memoryController = new MemoryControllerTest(modelName, pageSize, readTime, writeTime);
+
+    Disk disk(memoryController);
+
+    uintptr_t addr = 0;
+
+    // cache is disabled in MemoryControllerTest class
+    EXPECT_DOUBLE_EQ(disk.readBytes(addr, 100), readTime);
+    EXPECT_DOUBLE_EQ(disk.readBytes(addr, 100), readTime);
+
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 200);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readTime * 2);
+
+    EXPECT_EQ(disk.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+
+    EXPECT_DOUBLE_EQ(disk.flushCache(), 0.0);
+
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 0.0);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 0.0);
+
+    Disk copy(std::move(disk));
+
+    EXPECT_EQ(copy.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_EQ(copy.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 200);
+    EXPECT_DOUBLE_EQ(copy.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readTime * 2);
+    EXPECT_EQ(copy.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+
+    Disk copy2;
+    copy2 = std::move(copy);
+
+    EXPECT_EQ(copy2.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
+    EXPECT_EQ(copy2.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 200);
+    EXPECT_DOUBLE_EQ(copy2.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, readTime * 2);
+    EXPECT_EQ(copy2.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
 }
 
 GTEST_TEST(generalDiskBasicTest, read)

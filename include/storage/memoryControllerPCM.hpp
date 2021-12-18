@@ -9,6 +9,11 @@ class MemoryControllerPCM : public MemoryController
 public:
     MemoryControllerPCM(MemoryModelPCM* pcm);
 
+    MemoryController* clone() const noexcept(true) override
+    {
+        return new MemoryControllerPCM(*this);
+    }
+
     /**
      * @brief Created brief snapshot of Memory Controller as a string
      *
