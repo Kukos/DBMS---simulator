@@ -123,6 +123,11 @@ private:
         return time;
     }
 public:
+    DBIndex* clone() const noexcept(true) override
+    {
+        return new DBIndexTest(*this);
+    }
+
     double insertEntries(size_t numOperations = 1) noexcept(true) override
     {
         double time = 0.0;
@@ -275,6 +280,9 @@ GTEST_TEST(generalDBIndexBasicTest, interface)
     EXPECT_EQ(index->getRecordSize(), recordSize);
     EXPECT_EQ(index->isBulkloadSupported(), false);
 
+    DBIndex* copy = index->clone();
+
+    delete copy;
     delete index;
 }
 

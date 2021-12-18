@@ -10,6 +10,15 @@ private:
     bool isSpecialBulkloadFeatureOn;
 
 public:
+    /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndex
+    *
+    * @return new DBIndex
+    */
+    DBIndex* clone() const noexcept(true)
+    {
+        return new PhantomIndex(*this);
+    }
 
     /**
      * @brief Create Phantom Index

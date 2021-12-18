@@ -28,6 +28,16 @@ private:
 
 public:
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndex
+    *
+    * @return new DBIndex
+    */
+    DBIndex* clone() const noexcept(true)
+    {
+        return new UBPTree(*this);
+    }
+
+    /**
      * @brief Create UBPTree
      *
      * @param[in] disk -     pointer to disk

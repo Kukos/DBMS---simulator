@@ -93,6 +93,17 @@ private:
 
 public:
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndex
+    *
+    * @return new DBIndex
+    */
+    DBIndex* clone() const noexcept(true)
+    {
+        return new FATree(*this);
+    }
+
+
+    /**
      * @brief Create FATree
      *
      * @param[in] disk - pointer to disk

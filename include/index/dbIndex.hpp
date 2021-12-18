@@ -18,6 +18,13 @@ protected:
     size_t numEntries;
 public:
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndex
+    *
+    * @return new DBIndex
+    */
+    virtual DBIndex* clone() const noexcept(true) = 0;
+
+    /**
      * @brief Create DBIndex
      *
      * @param[in] name - Index name
