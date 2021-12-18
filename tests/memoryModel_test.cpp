@@ -49,6 +49,11 @@ public:
                                std::string("}"));
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelTest(*this);
+    }
+
     double writeBytes(size_t bytes) noexcept(true) override
     {
         const size_t pages = bytesToPages(bytes);

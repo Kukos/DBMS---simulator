@@ -26,6 +26,29 @@ MemoryController::MemoryController(MemoryModel* memoryModel, size_t readCacheLin
     LOGGER_LOG_DEBUG("Memory controller created: {}", toStringFull());
 }
 
+MemoryController::MemoryController(const MemoryController& other)
+: MemoryController((*other.memoryModel).clone(), other.readCacheLineSize, other.writeCacheLineSize)
+{
+    readCache = other.readCache;
+    writeCache = other.writeCache;
+    overwriteCache = other.overwriteCache;
+}
+
+MemoryController& MemoryController::operator=(const MemoryController& other)
+{
+    if (this == &other)
+        return *this;
+
+    readCacheLineSize = other.readCacheLineSize;
+    writeCacheLineSize = other.writeCacheLineSize;
+    readCache = other.readCache;
+    writeCache = other.writeCache;
+    overwriteCache = other.overwriteCache;
+    memoryModel.reset((*other.memoryModel).clone());
+
+    return *this;
+}
+
 const char* MemoryController::getModelName() const noexcept(true)
 {
     return memoryModel->getModelName();

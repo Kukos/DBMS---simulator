@@ -15,6 +15,12 @@ private:
     double eraseBlocks(size_t blocks) noexcept(true);
 
 public:
+
+    virtual MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandRaw(*this);
+    }
+
     virtual ~MemoryModelFlashNandRaw() = default;
     MemoryModelFlashNandRaw() = default;
     MemoryModelFlashNandRaw(const MemoryModelFlashNandRaw&) = default;
@@ -83,6 +89,11 @@ public:
 
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandRaw_SamsungK9F1G08U0D(*this);
+    }
+
     ~MemoryModelFlashNandRaw_SamsungK9F1G08U0D() = default;
     MemoryModelFlashNandRaw_SamsungK9F1G08U0D(const MemoryModelFlashNandRaw_SamsungK9F1G08U0D&) = default;
     MemoryModelFlashNandRaw_SamsungK9F1G08U0D& operator=(const MemoryModelFlashNandRaw_SamsungK9F1G08U0D&) = default;
@@ -100,6 +111,11 @@ public:
 
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA(*this);
+    }
+
     ~MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA() = default;
     MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA(const MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA&) = default;
     MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA& operator=(const MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA&) = default;
@@ -115,6 +131,11 @@ public:
     : MemoryModelFlashNandRaw("FlashNandRaw:micronMT29F32G08CBEDBL83A3WC1", 4096, 4096 * 128, 50.0 / 1000000.0, 900.0 / 1000000.0, 3500 / 1000000.0)
     {
 
+    }
+
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1(*this);
     }
 
     ~MemoryModelFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1() = default;

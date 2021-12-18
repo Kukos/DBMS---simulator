@@ -17,6 +17,13 @@ protected:
 
 public:
     /**
+    * @brief Virtual constructor idiom implemented as clone function. This function creates new MemoryModel
+    *
+    * @return new MemoryModel
+    */
+    virtual MemoryModel* clone() const noexcept(true) = 0;
+
+    /**
      * @brief Write contiguous bytes to MemoryModel
      *
      * @param[in] bytes - bytes to write

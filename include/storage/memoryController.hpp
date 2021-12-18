@@ -132,8 +132,10 @@ public:
 
     virtual ~MemoryController() = default;
     MemoryController() = default;
-    MemoryController(const MemoryController&) = default;
-    MemoryController& operator=(const MemoryController&) = default;
+
+    MemoryController(const MemoryController&);
+    MemoryController& operator=(const MemoryController&);
+
     MemoryController(MemoryController &&) = default;
     MemoryController& operator=(MemoryController &&) = default;
 };

@@ -27,6 +27,11 @@ private:
     double flushDirtyPages() noexcept(true);
 
 public:
+    virtual MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelSSD(*this);
+    }
+
     virtual ~MemoryModelSSD() = default;
     MemoryModelSSD() = default;
     MemoryModelSSD(const MemoryModelSSD&) = default;
@@ -96,6 +101,12 @@ public:
     {
 
     }
+
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelSSD_Samsung840(*this);
+    }
+
     ~MemoryModelSSD_Samsung840() = default;
     MemoryModelSSD_Samsung840(const MemoryModelSSD_Samsung840&) = default;
     MemoryModelSSD_Samsung840& operator=(const MemoryModelSSD_Samsung840&) = default;
@@ -112,6 +123,11 @@ public:
 
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelSSD_IntelDCP4511(*this);
+    }
+
     ~MemoryModelSSD_IntelDCP4511() = default;
     MemoryModelSSD_IntelDCP4511(const MemoryModelSSD_IntelDCP4511&) = default;
     MemoryModelSSD_IntelDCP4511& operator=(const MemoryModelSSD_IntelDCP4511&) = default;
@@ -126,6 +142,11 @@ public:
     : MemoryModelSSD("SSD:toshibaVX500", 4096, 4096 * 64, 10.8 / 1000000.0, 15.3 / 1000000.0, 7.2 / 1000000.0, 7.8 / 1000000.0, 153.0 * 64.0 / 1000000.0)
     {
 
+    }
+
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelSSD_ToshibaVX500(*this);
     }
 
     ~MemoryModelSSD_ToshibaVX500() = default;

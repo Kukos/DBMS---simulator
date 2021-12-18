@@ -49,6 +49,11 @@ public:
                                std::string("}"));
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelTest(*this);
+    }
+
     double writeBytes(size_t bytes) noexcept(true) override
     {
         const size_t pages = bytesToPages(bytes);
@@ -84,6 +89,92 @@ GTEST_TEST(generalControllerBasicTest, interface)
     EXPECT_EQ(controller.getPageSize(), pageSize);
     EXPECT_EQ(controller.getBlockSize(), 0);
     EXPECT_EQ(controller.getMemoryWearOut(), 0);
+}
+
+GTEST_TEST(generalControllerBasicTest, copy)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+
+    MemoryModel* memory = new MemoryModelTest(modelName, pageSize, readTime, writeTime);
+    MemoryController controller(memory);
+
+    EXPECT_EQ(std::string(controller.getModelName()), std::string(modelName));
+    EXPECT_EQ(controller.getPageSize(), pageSize);
+    EXPECT_EQ(controller.getBlockSize(), 0);
+    EXPECT_EQ(controller.getMemoryWearOut(), 0);
+    EXPECT_EQ(controller.getPageSize(), pageSize);
+
+    MemoryController* copy = new MemoryController(controller);
+
+    EXPECT_EQ(std::string(copy->getModelName()), std::string(modelName));
+    EXPECT_EQ(copy->getPageSize(), pageSize);
+    EXPECT_EQ(copy->getBlockSize(), 0);
+    EXPECT_EQ(copy->getMemoryWearOut(), 0);
+    EXPECT_EQ(copy->getPageSize(), pageSize);
+
+    MemoryController copy2(*copy);
+
+    EXPECT_EQ(std::string(copy2.getModelName()), std::string(modelName));
+    EXPECT_EQ(copy2.getPageSize(), pageSize);
+    EXPECT_EQ(copy2.getBlockSize(), 0);
+    EXPECT_EQ(copy2.getMemoryWearOut(), 0);
+    EXPECT_EQ(copy2.getPageSize(), pageSize);
+
+    MemoryController copy3;
+    copy3 = copy2;
+    EXPECT_EQ(std::string(copy3.getModelName()), std::string(modelName));
+    EXPECT_EQ(copy3.getPageSize(), pageSize);
+    EXPECT_EQ(copy3.getBlockSize(), 0);
+    EXPECT_EQ(copy3.getMemoryWearOut(), 0);
+    EXPECT_EQ(copy3.getPageSize(), pageSize);
+
+    delete copy;
+}
+
+GTEST_TEST(generalControllerBasicTest, move)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+
+    MemoryModel* memory = new MemoryModelTest(modelName, pageSize, readTime, writeTime);
+    MemoryController controller(memory);
+
+    EXPECT_EQ(std::string(controller.getModelName()), std::string(modelName));
+    EXPECT_EQ(controller.getPageSize(), pageSize);
+    EXPECT_EQ(controller.getBlockSize(), 0);
+    EXPECT_EQ(controller.getMemoryWearOut(), 0);
+    EXPECT_EQ(controller.getPageSize(), pageSize);
+
+    MemoryController* copy = new MemoryController(std::move(controller));
+
+    EXPECT_EQ(std::string(copy->getModelName()), std::string(modelName));
+    EXPECT_EQ(copy->getPageSize(), pageSize);
+    EXPECT_EQ(copy->getBlockSize(), 0);
+    EXPECT_EQ(copy->getMemoryWearOut(), 0);
+    EXPECT_EQ(copy->getPageSize(), pageSize);
+
+    MemoryController copy2(std::move(*copy));
+
+    EXPECT_EQ(std::string(copy2.getModelName()), std::string(modelName));
+    EXPECT_EQ(copy2.getPageSize(), pageSize);
+    EXPECT_EQ(copy2.getBlockSize(), 0);
+    EXPECT_EQ(copy2.getMemoryWearOut(), 0);
+    EXPECT_EQ(copy2.getPageSize(), pageSize);
+
+    MemoryController copy3;
+    copy3 = std::move(copy2);
+    EXPECT_EQ(std::string(copy3.getModelName()), std::string(modelName));
+    EXPECT_EQ(copy3.getPageSize(), pageSize);
+    EXPECT_EQ(copy3.getBlockSize(), 0);
+    EXPECT_EQ(copy3.getMemoryWearOut(), 0);
+    EXPECT_EQ(copy3.getPageSize(), pageSize);
+
+    delete copy;
 }
 
 GTEST_TEST(generalControllerBasicTest, singleRead)

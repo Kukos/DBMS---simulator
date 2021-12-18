@@ -13,6 +13,11 @@ private:
     double writeMemLines(size_t memLines) noexcept(true);
 
 public:
+    virtual MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelPCM(*this);
+    }
+
     virtual ~MemoryModelPCM() = default;
     MemoryModelPCM() = default;
     MemoryModelPCM(const MemoryModelPCM&) = default;
@@ -77,6 +82,11 @@ public:
     : MemoryModelPCM("PCM:defaultModel", 64, 50.0 / 1000000000.0, 1.0 / 1000000)
     {
 
+    }
+
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelPCM_DefaultModel(*this);
     }
 
     ~MemoryModelPCM_DefaultModel() = default;

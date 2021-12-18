@@ -21,6 +21,11 @@ private:
     double flushDirtyPages() noexcept(true);
 
 public:
+    virtual MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandFTL(*this);
+    }
+
     virtual ~MemoryModelFlashNandFTL() = default;
     MemoryModelFlashNandFTL() = default;
     MemoryModelFlashNandFTL(const MemoryModelFlashNandFTL&) = default;
@@ -89,6 +94,11 @@ public:
 
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandFTL_SamsungK9F1G08U0D(*this);
+    }
+
     ~MemoryModelFlashNandFTL_SamsungK9F1G08U0D() = default;
     MemoryModelFlashNandFTL_SamsungK9F1G08U0D(const MemoryModelFlashNandFTL_SamsungK9F1G08U0D&) = default;
     MemoryModelFlashNandFTL_SamsungK9F1G08U0D& operator=(const MemoryModelFlashNandFTL_SamsungK9F1G08U0D&) = default;
@@ -106,6 +116,12 @@ public:
 
     }
 
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandFTL_MicronMT29F32G08ABAAA(*this);
+    }
+
+
     ~MemoryModelFlashNandFTL_MicronMT29F32G08ABAAA() = default;
     MemoryModelFlashNandFTL_MicronMT29F32G08ABAAA(const MemoryModelFlashNandFTL_MicronMT29F32G08ABAAA&) = default;
     MemoryModelFlashNandFTL_MicronMT29F32G08ABAAA& operator=(const MemoryModelFlashNandFTL_MicronMT29F32G08ABAAA&) = default;
@@ -121,6 +137,11 @@ public:
     : MemoryModelFlashNandFTL("FlashNandFTL:micronMT29F32G08CBEDBL83A3WC1", 4096, 4096 * 128, 50.0 / 1000000.0, 900.0 / 1000000.0, 3500 / 1000000.0)
     {
 
+    }
+
+    MemoryModel* clone() const noexcept(true) override
+    {
+        return new MemoryModelFlashNandFTL_MicronMT29F32G08CBEDBL83A3WC1(*this);
     }
 
     ~MemoryModelFlashNandFTL_MicronMT29F32G08CBEDBL83A3WC1() = default;
