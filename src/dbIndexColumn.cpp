@@ -108,3 +108,9 @@ std::string DBIndexColumn::toStringFull(bool oneLine) const noexcept(true)
                            std::string("\t.counters = ") + counters.toStringFull() + std::string("\n") +
                            std::string("}"));
 }
+
+void DBIndexColumn::resetState() noexcept(true)
+{
+    disk->resetState();
+    counters = IndexCounters();
+}

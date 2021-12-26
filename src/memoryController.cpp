@@ -76,6 +76,12 @@ uintptr_t MemoryController::getCurrentMemoryAddr() const noexcept(true)
     return 0;
 }
 
+void MemoryController::resetState() noexcept(true)
+{
+    memoryModel->resetState();
+    counters = MemoryCounters();
+}
+
 double MemoryController::flushCache() noexcept(true)
 {
     double flushWriteTime = 0.0;

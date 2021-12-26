@@ -46,6 +46,12 @@ std::string DBIndex::toStringFull(bool oneLine) const noexcept(true)
                            std::string("}"));
 }
 
+void DBIndex::resetState() noexcept(true)
+{
+    disk->resetState();
+    counters = IndexCounters();
+}
+
 DBIndex::DBIndex(const char*name, Disk* disk, size_t sizeKey, size_t sizeData)
 : name{name}, disk{std::unique_ptr<Disk>(disk)}, sizeKey{sizeKey}, sizeData{sizeData}, sizeRecord{sizeKey + sizeData}, numEntries{0}
 {

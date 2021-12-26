@@ -266,36 +266,3 @@ GTEST_TEST(controllerColumnOverlayBasicTest, changeMemoryModel)
     delete memory;
     delete memory2;
 }
-
-GTEST_TEST(controllerColumnOverlayBasicTest, resetState)
-{
-    const char* const modelName = "testModel";
-    const size_t pageSize = 2048;
-    const double readTime = 0.1;
-    const double writeTime = 4.4;
-
-    MemoryModel* memory = new MemoryModelTest(modelName, pageSize, readTime, writeTime);
-    MemoryControllerColumnOverlay controller(memory);
-
-    EXPECT_EQ(std::string(controller.getModelName()), std::string(modelName));
-    EXPECT_EQ(controller.getPageSize(), pageSize);
-    EXPECT_EQ(controller.getBlockSize(), 0);
-    EXPECT_EQ(controller.getMemoryWearOut(), 0);
-
-    controller.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES, 10);
-    controller.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME, 5.5);
-
-    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 10);
-    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 5.5);
-
-    controller.resetState();
-
-    EXPECT_EQ(controller.getPageSize(), pageSize);
-    EXPECT_EQ(controller.getBlockSize(), 0);
-    EXPECT_EQ(controller.getMemoryWearOut(), 0);
-
-    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 0);
-    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
-
-    delete memory;
-}

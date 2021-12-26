@@ -367,3 +367,26 @@ GTEST_TEST(generalMemoryModelBasicTest, overwrite)
 
     delete model;
 }
+
+GTEST_TEST(generalMemoryModelBasicTest, resetState)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 10;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+
+    MemoryModel* model = new MemoryModelTest(modelName, pageSize, readTime, writeTime);
+
+    EXPECT_DOUBLE_EQ(model->writeBytes(1), writeTime);
+    EXPECT_EQ(model->getMemoryWearOut(), (1) * pageSize);
+
+    model->resetState();
+
+    EXPECT_EQ(std::string(model->getModelName()), std::string(modelName));
+    EXPECT_EQ(model->getPageSize(), pageSize);
+    EXPECT_EQ(model->getBlockSize(), 0);
+    EXPECT_EQ(model->getMemoryWearOut(), 0);
+
+
+    delete model;
+}

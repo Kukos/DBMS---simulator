@@ -25,6 +25,12 @@ public:
     virtual DBIndex* clone() const noexcept(true) = 0;
 
     /**
+     * @brief Reset non-const values to default value
+     *
+     */
+    virtual void resetState() noexcept(true);
+
+    /**
      * @brief Create DBIndex
      *
      * @param[in] name - Index name

@@ -45,6 +45,12 @@ std::string MemoryModel::toStringFull(bool oneLine) const noexcept(true)
                            std::string("}"));
 }
 
+void MemoryModel::resetState() noexcept(true)
+{
+    // for now only reset wearout
+    touchedBytes = 0;
+}
+
 MemoryModel::MemoryModel(const char* modelName, size_t pageSize, size_t blockSize)
 : modelName{modelName}, pageSize{pageSize}, blockSize{blockSize}, touchedBytes{0}
 {

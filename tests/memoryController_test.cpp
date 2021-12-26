@@ -710,3 +710,63 @@ GTEST_TEST(generalControllerBasicTest, mixWorkloadDifferentCacheLines)
     EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 1);
     EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 10.0 * overwriteTime);
 }
+
+GTEST_TEST(generalControllerBasicTest, resetState)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+    const double overwriteTime = writeTime * 100.0;
+    const size_t readCacheLineSize = pageSize;
+    const size_t writeCacheLineSize = 10 * pageSize;
+
+    MemoryModel* memory = new MemoryModelTest(modelName, pageSize, readTime, writeTime);
+    MemoryController controller(memory, readCacheLineSize, writeCacheLineSize);
+
+    uintptr_t addr = 0;
+
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), readTime);
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), 0.0);
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr, 2000), 0.0);
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr + 1000, 100), 0.0);
+    EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 100), 0.0);
+    EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 100), 0.0);
+    EXPECT_DOUBLE_EQ(controller.writeBytes(addr, 2000), 0.0);
+    EXPECT_DOUBLE_EQ(controller.writeBytes(addr + 1000, 100), 0.0);
+    EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    addr = pageSize * 100;
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), readTime);
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr, 100), 0.0);
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr, 2000), 0.0);
+    EXPECT_DOUBLE_EQ(controller.readBytes(addr + 1000, 100), 0.0);
+
+    EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 100), 0.0);
+    EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 100), 0.0);
+    EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr, 2000), 0.0);
+    EXPECT_DOUBLE_EQ(controller.overwriteBytes(addr + 1000, 100), 0.0);
+    EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_DOUBLE_EQ(controller.flushCache(), 10.0 * writeTime +  10.0 * overwriteTime + 9.0 * readTime);
+
+    EXPECT_EQ(controller.getMemoryWearOut(), writeCacheLineSize * 2);
+
+    controller.resetState();
+
+    EXPECT_EQ(controller.getMemoryWearOut(), 0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second, 0);
+    EXPECT_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(controller.getCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, 0.0);
+}

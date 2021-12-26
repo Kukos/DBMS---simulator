@@ -81,12 +81,6 @@ public:
      */
     MemoryModel& getMemoryModel() noexcept(true);
 
-    /**
-     * @brief Reset non-const values to default value
-     *
-     */
-    void resetState() noexcept(true);
-
     virtual ~MemoryControllerColumnOverlay() = default;
     MemoryControllerColumnOverlay() = default;
     MemoryControllerColumnOverlay(const MemoryControllerColumnOverlay&) = default;

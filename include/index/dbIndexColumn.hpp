@@ -32,6 +32,12 @@ public:
     DBIndexColumn(const char*name, Disk* disk, const std::vector<size_t>& columnsSize);
 
     /**
+     * @brief Reset non-const values to default value
+     *
+     */
+    virtual void resetState() noexcept(true);
+
+    /**
     * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndexColumn
     *
     * @return new DBIndexColumn

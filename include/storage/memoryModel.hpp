@@ -110,6 +110,12 @@ public:
      */
     virtual std::string toStringFull(bool oneLine = true) const noexcept(true);
 
+    /**
+     * @brief Reset non-const values to default value
+     *
+     */
+    virtual void resetState() noexcept(true);
+
     virtual ~MemoryModel() = default;
 
     MemoryModel() = default;

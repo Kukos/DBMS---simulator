@@ -245,37 +245,6 @@ GTEST_TEST(diskColumnOverlayBasicTest, peg)
     delete memoryController;
 }
 
-GTEST_TEST(diskColumnOverlayBasicTest, resetState)
-{
-    const char* const modelName = "testModel";
-    const size_t pageSize = 2048;
-    const double readTime = 0.1;
-    const double writeTime = 4.4;
-    MemoryControllerTest* memoryController = new MemoryControllerTest(modelName, pageSize, readTime, writeTime);
-
-    DiskColumnOverlay disk(memoryController);
-
-    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
-    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
-
-    disk.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 5);
-    disk.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME, 2.0);
-
-    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 5);
-    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 2.0);
-
-    dynamic_cast<MemoryControllerColumnOverlay*>(&const_cast<MemoryController&>(disk.getLowLevelController()))->pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 2);
-    EXPECT_EQ(disk.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 2);
-
-    disk.resetState();
-
-    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
-    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
-    EXPECT_EQ(disk.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
-
-    delete memoryController;
-}
-
 GTEST_TEST(diskColumnOverlayBasicTest, addStats)
 {
     const char* const modelName = "testModel";

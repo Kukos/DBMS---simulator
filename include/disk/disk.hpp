@@ -23,6 +23,12 @@ public:
     }
 
     /**
+     * @brief Reset non-const values to default value
+     *
+     */
+    virtual void resetState() noexcept(true);
+
+    /**
      * @brief Get Low Level MemoryController in read only access mode
      *        You can use this function to read controller counters, name and other features
      *

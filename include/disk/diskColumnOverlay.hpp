@@ -47,12 +47,6 @@ public:
     void setCounter(enum MemoryCounters::MemoryCountersD counterId, double value) noexcept(true);
 
     /**
-     * @brief Reset non-const values to default value
-     *
-     */
-    void resetState() noexcept(true);
-
-    /**
      * @brief Add (Aggregate) stats from disk into overlay
      *
      * @param[in] disk - disk from stats will be aggregated

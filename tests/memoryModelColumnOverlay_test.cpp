@@ -217,29 +217,3 @@ GTEST_TEST(memoryModelColumnOverlayBasicTest, touchedBytes)
 
     delete model;
 }
-
-GTEST_TEST(memoryModelColumnOverlayBasicTest, resetState)
-{
-    const char* const modelName = "testModel";
-    const size_t pageSize = 10;
-    const size_t blockSize = 100;
-
-    MemoryModelColumnOverlay* model = new MemoryModelColumnOverlay(modelName, pageSize, blockSize);
-
-    EXPECT_EQ(std::string(model->getModelName()), std::string(modelName));
-    EXPECT_EQ(model->getPageSize(), pageSize);
-    EXPECT_EQ(model->getBlockSize(), blockSize);
-    EXPECT_EQ(model->getMemoryWearOut(), 0);
-
-    model->setWearOut(100);
-    EXPECT_EQ(model->getMemoryWearOut(), 100);
-
-    model->resetState();
-
-    EXPECT_EQ(std::string(model->getModelName()), std::string(modelName));
-    EXPECT_EQ(model->getPageSize(), pageSize);
-    EXPECT_EQ(model->getBlockSize(), blockSize);
-    EXPECT_EQ(model->getMemoryWearOut(), 0);
-
-    delete model;
-}

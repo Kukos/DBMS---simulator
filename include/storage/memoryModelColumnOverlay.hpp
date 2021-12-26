@@ -83,12 +83,6 @@ public:
      */
     void addWearOut(size_t bytes) noexcept(true);
 
-    /**
-     * @brief Reset non-const values to default value
-     *
-     */
-    void resetState() noexcept(true);
-
     virtual ~MemoryModelColumnOverlay() = default;
     MemoryModelColumnOverlay() = default;
     MemoryModelColumnOverlay(const MemoryModelColumnOverlay&) = default;

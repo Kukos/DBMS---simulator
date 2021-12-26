@@ -45,13 +45,6 @@ void DiskColumnOverlay::setCounter(enum MemoryCounters::MemoryCountersD counterI
     diskCounters.pegCounter(counterId, value);
 }
 
-void DiskColumnOverlay::resetState() noexcept(true)
-{
-    // for sure we have column overlay
-    dynamic_cast<MemoryControllerColumnOverlay*>(memoryController.get())->resetState();
-    diskCounters = MemoryCounters();
-}
-
 void DiskColumnOverlay::addStats(const Disk& disk) noexcept(true)
 {
     MemoryControllerColumnOverlay* memoryController = dynamic_cast<MemoryControllerColumnOverlay*>(this->memoryController.get());

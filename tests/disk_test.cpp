@@ -350,3 +350,28 @@ GTEST_TEST(generalDiskBasicTest, mixWorkload)
     EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_TIME).second, writeTime);
     EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, writeTime);
 }
+
+GTEST_TEST(generalDiskBasicTest, resetState)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.2;
+    const double writeTime = 4.4;
+    MemoryControllerTest* memoryController = new MemoryControllerTest(modelName, pageSize, readTime, writeTime);
+
+    Disk disk(memoryController);
+
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
+
+    EXPECT_DOUBLE_EQ(disk.readBytes(0, 100), readTime);
+
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 1);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.2);
+
+    disk.resetState();
+
+    EXPECT_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(disk.getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME).second, 0.0);
+    EXPECT_EQ(disk.getLowLevelController().getCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS).second, 0);
+}

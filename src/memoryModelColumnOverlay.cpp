@@ -62,12 +62,6 @@ void MemoryModelColumnOverlay::addWearOut(size_t bytes) noexcept(true)
     touchedBytes += bytes;
 }
 
-void MemoryModelColumnOverlay::resetState() noexcept(true)
-{
-    // for now only reset wearout
-    resetWearOut();
-}
-
 double MemoryModelColumnOverlay::writeBytes(size_t bytes) noexcept(true)
 {
     (void)bytes;

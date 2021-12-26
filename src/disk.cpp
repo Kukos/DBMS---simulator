@@ -61,6 +61,12 @@ double Disk::overwriteBytes(uintptr_t addr, size_t bytes) noexcept(true)
     return time;
 }
 
+void Disk::resetState() noexcept(true)
+{
+    memoryController->resetState();
+    diskCounters = MemoryCounters();
+}
+
 std::pair<std::string, double> Disk::getDiskCounter(enum MemoryCounters::MemoryCountersD counterId) const noexcept(true)
 {
     return diskCounters.getCounter(counterId);

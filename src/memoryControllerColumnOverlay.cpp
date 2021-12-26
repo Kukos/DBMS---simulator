@@ -48,13 +48,6 @@ void MemoryControllerColumnOverlay::setCounter(enum MemoryCounters::MemoryCounte
     counters.pegCounter(counterId, value);
 }
 
-void MemoryControllerColumnOverlay::resetState() noexcept(true)
-{
-    // for sure we have column overlay
-    dynamic_cast<MemoryModelColumnOverlay*>(memoryModel.get())->resetState();
-    counters = MemoryCounters();
-}
-
 std::string MemoryControllerColumnOverlay::toString(bool oneLine) const noexcept(true)
 {
     if (oneLine)
