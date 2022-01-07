@@ -22,10 +22,22 @@ public:
     /**
      * @brief Construct a new Workload Step object
      *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numEntriesToInsert - how many entries pushed to insert operation
+     */
+    WorkloadStepInsert(DBIndexColumn* index, size_t numEntriesToInsert)
+    : WorkloadStep("WorkloadStepInsert", index, numEntriesToInsert, 1, 0.0)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
      * @param[in] numEntriesToInsert - how many entries pushed to insert operation
      */
     WorkloadStepInsert(size_t numEntriesToInsert)
-    : WorkloadStep("WorkloadStepInsert", nullptr, numEntriesToInsert, 1, 0.0)
+    : WorkloadStep("WorkloadStepInsert", static_cast<DBIndex*>(nullptr), numEntriesToInsert, 1, 0.0)
     {
 
     }
@@ -48,7 +60,7 @@ public:
      */
     virtual double executeStep() noexcept(true) override
     {
-        if (index == nullptr)
+        if ((isColumnIndexMode == false && rIndex == nullptr) || (isColumnIndexMode == true && cIndex == nullptr))
         {
             LOGGER_LOG_ERROR("Index is not set (nullptr)");
             return 0.0;
@@ -56,7 +68,7 @@ public:
 
         prepareStep();
 
-        const double time = index->insertEntries(numOperations);
+        const double time = isColumnIndexMode == false ? rIndex->insertEntries(numOperations) : cIndex->insertEntries(numOperations);
 
         finishStep();
 

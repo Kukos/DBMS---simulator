@@ -3,6 +3,7 @@
 
 #include <observability/workloadCounters.hpp>
 #include <index/dbIndex.hpp>
+#include <index/dbIndexColumn.hpp>
 #include <workload/workloadStep.hpp>
 #include <logger/logger.hpp>
 
@@ -14,11 +15,13 @@ protected:
     std::vector<WorkloadStep*> steps;
 
     // per Index
-    std::vector<DBIndex*> indexes;
+    std::vector<DBIndex*> rIndexes;
+    std::vector<DBIndexColumn*> cIndexes;
     std::vector<WorkloadCounters> totalCounters;
     std::vector<std::vector<WorkloadCounters>> stepCounters;
 
     void aggregateCounters(WorkloadCounters& total, const WorkloadCounters& step) noexcept(true);
+    bool isColumnIndexMode;
 public:
 
     /**
@@ -30,6 +33,14 @@ public:
     Workload(const std::vector<DBIndex*>& indexes, const std::vector<WorkloadStep*>& steps);
 
     /**
+     * @brief Construct a new Workload object
+     *
+     * @param[in] indexes - vector of Indexes
+     * @param[in] steps  - vector of Workload steps
+     */
+    Workload(const std::vector<DBIndexColumn*>& indexes, const std::vector<WorkloadStep*>& steps);
+
+    /**
     * @brief Virtual constructor idiom implemented as clone function. This function creates new Workload
     *
     * @return new Workload
@@ -37,6 +48,17 @@ public:
     virtual Workload* clone() const noexcept(true)
     {
         return new Workload(*this);
+    };
+
+    /**
+     * @brief Get Index Mode
+     *
+     * @return true if in column mode
+     * @return false if in raw mode
+     */
+    bool isInColumnMode() const noexcept(true)
+    {
+        return isColumnIndexMode;
     }
 
     /**
@@ -54,6 +76,13 @@ public:
     void addIndex(DBIndex* index) noexcept(true);
 
     /**
+     * @brief Add Index to the Workload
+     *
+     * @param[in] index - index to add
+     */
+    void addIndex(DBIndexColumn* index) noexcept(true);
+
+    /**
      * @brief Run all steps for all indexes
      *
      */
@@ -66,7 +95,7 @@ public:
      */
     size_t getNumIndexes() const noexcept(true)
     {
-        return indexes.size();
+        return isColumnIndexMode == false ? rIndexes.size() : cIndexes.size();
     }
 
     /**
@@ -74,9 +103,19 @@ public:
      *
      * @return vector with all indexes
      */
-    const std::vector<DBIndex*>& getAllIndexes() const noexcept(true)
+    const std::vector<DBIndex*>& getAllRawIndexes() const noexcept(true)
     {
-        return indexes;
+        return rIndexes;
+    }
+
+    /**
+     * @brief Get the All Indexes
+     *
+     * @return vector with all indexes
+     */
+    const std::vector<DBIndexColumn*>& getAllColumnIndexes() const noexcept(true)
+    {
+        return cIndexes;
     }
 
     /**

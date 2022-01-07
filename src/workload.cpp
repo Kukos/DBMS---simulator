@@ -14,7 +14,13 @@ void Workload::aggregateCounters(WorkloadCounters& total, const WorkloadCounters
 
 
 Workload::Workload(const std::vector<DBIndex*>& indexes, const std::vector<WorkloadStep*>& steps)
-: steps{steps}, indexes{indexes}
+: steps{steps}, rIndexes{indexes}, isColumnIndexMode{false}
+{
+    LOGGER_LOG_DEBUG("Workload created {}", toStringFull());
+}
+
+Workload::Workload(const std::vector<DBIndexColumn*>& indexes, const std::vector<WorkloadStep*>& steps)
+: steps{steps}, cIndexes{indexes}, isColumnIndexMode{true}
 {
     LOGGER_LOG_DEBUG("Workload created {}", toStringFull());
 }
@@ -27,7 +33,9 @@ Workload::~Workload()
 
 Workload::Workload(const Workload& other)
 {
-    indexes = other.indexes;
+    rIndexes = other.rIndexes;
+    cIndexes = other.cIndexes;
+    isColumnIndexMode = other.isColumnIndexMode;
     totalCounters = other.totalCounters;
     stepCounters = other.stepCounters;
 
@@ -40,7 +48,9 @@ Workload& Workload::operator=(const Workload& other)
     if (&other == this)
         return *this;
 
-    indexes = other.indexes;
+    rIndexes = other.rIndexes;
+    cIndexes = other.cIndexes;
+    isColumnIndexMode = other.isColumnIndexMode;
     totalCounters = other.totalCounters;
     stepCounters = other.stepCounters;
 
@@ -57,12 +67,21 @@ void Workload::addStep(WorkloadStep* step) noexcept(true)
 
 void Workload::addIndex(DBIndex* index) noexcept(true)
 {
-    indexes.push_back(index);
+    rIndexes.push_back(index);
+    isColumnIndexMode = false;
+}
+
+void Workload::addIndex(DBIndexColumn* index) noexcept(true)
+{
+    cIndexes.push_back(index);
+    isColumnIndexMode = true;
 }
 
 void Workload::run() noexcept(true)
 {
-    for (size_t i = 0; i < indexes.size(); ++i)
+    size_t indexesSize = isColumnIndexMode == false ? rIndexes.size() : cIndexes.size();
+
+    for (size_t i = 0; i < indexesSize; ++i)
     {
         WorkloadCounters totalStats;
         std::vector<WorkloadCounters> stepStats;
@@ -70,7 +89,11 @@ void Workload::run() noexcept(true)
         // run steps for index(i)
         for (size_t j = 0; j < steps.size(); ++j)
         {
-            steps[j]->setDbIndex(indexes[i]);
+            if (isColumnIndexMode == false)
+                steps[j]->setDbIndex(rIndexes[i]);
+            else
+                steps[j]->setDbIndex(cIndexes[i]);
+
             steps[j]->executeStep();
 
             const WorkloadCounters& stats = steps[j]->getCounters();
@@ -92,12 +115,19 @@ std::string Workload::toString(bool oneLine) const noexcept(true)
 
     const std::string stepsString = std::string("{ ") + std::accumulate(std::begin(steps), std::end(steps), std::string(), buildStringFromSteps) + std::string(" }");
 
-    auto buildStringFromIndexes = [](const std::string &accumulator, const DBIndex* index)
+    auto buildStringFromrIndexes = [](const std::string &accumulator, const DBIndex* index)
     {
         return accumulator.empty() ? index->toStringFull() : accumulator + "," + index->toStringFull();
     };
 
-    const std::string indexesString = std::string("{ ") + std::accumulate(std::begin(indexes), std::end(indexes), std::string(), buildStringFromIndexes) + std::string(" }");
+    const std::string rIndexesString = std::string("{ ") + std::accumulate(std::begin(rIndexes), std::end(rIndexes), std::string(), buildStringFromrIndexes) + std::string(" }");
+
+    auto buildStringFromcIndexes = [](const std::string &accumulator, const DBIndexColumn* index)
+    {
+        return accumulator.empty() ? index->toStringFull() : accumulator + "," + index->toStringFull();
+    };
+
+    const std::string cIndexesString = std::string("{ ") + std::accumulate(std::begin(cIndexes), std::end(cIndexes), std::string(), buildStringFromcIndexes) + std::string(" }");
 
     auto buildStringFromCounters = [](const std::string &accumulator, const WorkloadCounters& total)
     {
@@ -108,14 +138,17 @@ std::string Workload::toString(bool oneLine) const noexcept(true)
 
     if (oneLine)
         return std::string(std::string("Worklad {") +
+                           std::string(" .isColumnIndexMode = ") + std::to_string(isColumnIndexMode) +
                            std::string(" .steps = ") + stepsString +
-                           std::string(" .indexes = ") + indexesString +
+                           std::string(" .rIndexes = ") + rIndexesString +
+                           std::string(" .cIndexes = ") + cIndexesString +
                            std::string(" .totalCounters = ") + totalCounterString +
                            std::string(" }"));
     else
-        return std::string(std::string("CFDTree {\n") +
+        return std::string(std::string("Worklad {\n") +
                            std::string("\t.steps = ") + stepsString + std::string("\n") +
-                           std::string("\t.indexes = ") + indexesString + std::string("\n") +
+                           std::string("\t.rIndexes = ") + rIndexesString + std::string("\n") +
+                           std::string("\t.cIndexes = ") + cIndexesString + std::string("\n") +
                            std::string("\t.totalCounters = ") + totalCounterString + std::string("\n") +
                            std::string("}"));
 }
@@ -129,12 +162,19 @@ std::string Workload::toStringFull(bool oneLine) const noexcept(true)
 
     const std::string stepsString = std::string("{ ") + std::accumulate(std::begin(steps), std::end(steps), std::string(), buildStringFromSteps) + std::string(" }");
 
-    auto buildStringFromIndexes = [](const std::string &accumulator, const DBIndex* index)
+    auto buildStringFromrIndexes = [](const std::string &accumulator, const DBIndex* index)
     {
         return accumulator.empty() ? index->toStringFull() : accumulator + "," + index->toStringFull();
     };
 
-    const std::string indexesString = std::string("{ ") + std::accumulate(std::begin(indexes), std::end(indexes), std::string(), buildStringFromIndexes) + std::string(" }");
+    const std::string rIndexesString = std::string("{ ") + std::accumulate(std::begin(rIndexes), std::end(rIndexes), std::string(), buildStringFromrIndexes) + std::string(" }");
+
+    auto buildStringFromcIndexes = [](const std::string &accumulator, const DBIndexColumn* index)
+    {
+        return accumulator.empty() ? index->toStringFull() : accumulator + "," + index->toStringFull();
+    };
+
+    const std::string cIndexesString = std::string("{ ") + std::accumulate(std::begin(cIndexes), std::end(cIndexes), std::string(), buildStringFromcIndexes) + std::string(" }");
 
     auto buildStringFromCounters = [](const std::string &accumulator, const WorkloadCounters& total)
     {
@@ -159,15 +199,19 @@ std::string Workload::toStringFull(bool oneLine) const noexcept(true)
 
     if (oneLine)
         return std::string(std::string("Worklad {") +
+                           std::string(" .isColumnIndexMode = ") + std::to_string(isColumnIndexMode) +
                            std::string(" .steps = ") + stepsString +
-                           std::string(" .indexes = ") + indexesString +
+                           std::string(" .rIndexes = ") + rIndexesString +
+                           std::string(" .cIndexes = ") + cIndexesString +
                            std::string(" .totalCounters = ") + totalCounterString +
                            std::string(" .stepCounters = ") + stepsCounterString +
                            std::string(" }"));
     else
-        return std::string(std::string("CFDTree {\n") +
+        return std::string(std::string("Worklad {\n") +
+                           std::string("\t.isColumnIndexMode = ") + std::to_string(isColumnIndexMode) + std::string("\n") +
                            std::string("\t.steps = ") + stepsString + std::string("\n") +
-                           std::string("\t.indexes = ") + indexesString + std::string("\n") +
+                           std::string("\t.rIndexes = ") + rIndexesString + std::string("\n") +
+                           std::string("\t.cIndexes = ") + cIndexesString + std::string("\n") +
                            std::string("\t.totalCounters = ") + totalCounterString + std::string("\n") +
                            std::string("\t.stepCounters = ") + stepsCounterString + std::string("\n") +
                            std::string("}"));

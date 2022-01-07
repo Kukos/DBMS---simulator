@@ -22,10 +22,22 @@ public:
     /**
      * @brief Construct a new Workload Step object
      *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numEntriesToBulkload - how many entries pushed to bulkload operation
+     */
+    WorkloadStepBulkload(DBIndexColumn* index, size_t numEntriesToBulkload)
+    : WorkloadStep("WorkloadStepBulkload", index, 1, numEntriesToBulkload, 0.0)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
      * @param[in] numEntriesToBulkload - how many entries pushed to bulkload operation
      */
     WorkloadStepBulkload(size_t numEntriesToBulkload)
-    : WorkloadStep("WorkloadStepBulkload", nullptr, 1, numEntriesToBulkload, 0.0)
+    : WorkloadStep("WorkloadStepBulkload", static_cast<DBIndex*>(nullptr), 1, numEntriesToBulkload, 0.0)
     {
 
     }
@@ -48,7 +60,7 @@ public:
      */
     virtual double executeStep() noexcept(true) override
     {
-        if (index == nullptr)
+        if ((isColumnIndexMode == false && rIndex == nullptr) || (isColumnIndexMode == true && cIndex == nullptr))
         {
             LOGGER_LOG_ERROR("Index is not set (nullptr)");
             return 0.0;
@@ -57,10 +69,20 @@ public:
         prepareStep();
 
         double time = 0.0;
-        if (index->isBulkloadSupported())
-            time = index->bulkloadEntries(numEntriesPerOperations);
+        if (isColumnIndexMode == false)
+        {
+            if (rIndex->isBulkloadSupported())
+                time = rIndex->bulkloadEntries(numEntriesPerOperations);
+            else
+                time = rIndex->insertEntries(numEntriesPerOperations);
+        }
         else
-            time = index->insertEntries(numEntriesPerOperations);
+        {
+            if (cIndex->isBulkloadSupported())
+                time = cIndex->bulkloadEntries(numEntriesPerOperations);
+            else
+                time = cIndex->insertEntries(numEntriesPerOperations);
+        }
 
         finishStep();
 

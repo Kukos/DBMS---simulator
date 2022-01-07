@@ -2,6 +2,7 @@
 #include <disk/diskSSD.hpp>
 #include <index/phantomIndex.hpp>
 #include <index/bptree.hpp>
+#include <index/fbdsm.hpp>
 #include <string>
 #include <iostream>
 
@@ -237,7 +238,7 @@ GTEST_TEST(workloadStepPSearchTest, move)
     delete index;
 }
 
-GTEST_TEST(workloadStepPSearchTestReal, interface)
+GTEST_TEST(workloadStepPSearchTestRealRaw, interface)
 {
     Disk* disk = new DiskSSD_Samsung840();
 
@@ -267,7 +268,7 @@ GTEST_TEST(workloadStepPSearchTestReal, interface)
     delete index;
 }
 
-GTEST_TEST(workloadStepPSearchTestReal, singleStep)
+GTEST_TEST(workloadStepPSearchTestRealRaw, singleStep)
 {
     Disk* disk = new DiskSSD_Samsung840();
 
@@ -298,7 +299,7 @@ GTEST_TEST(workloadStepPSearchTestReal, singleStep)
 }
 
 
-GTEST_TEST(workloadStepPSearchTestReal, singleStepSel)
+GTEST_TEST(workloadStepPSearchTestRealRaw, singleStepSel)
 {
     Disk* disk = new DiskSSD_Samsung840();
 
@@ -328,7 +329,7 @@ GTEST_TEST(workloadStepPSearchTestReal, singleStepSel)
     delete index;
 }
 
-GTEST_TEST(workloadStepPSearchTestReal, multiStep)
+GTEST_TEST(workloadStepPSearchTestRealRaw, multiStep)
 {
     Disk* disk = new DiskSSD_Samsung840();
 
@@ -361,7 +362,7 @@ GTEST_TEST(workloadStepPSearchTestReal, multiStep)
     delete index;
 }
 
-GTEST_TEST(workloadStepPSearchTestReal, multiStepSel)
+GTEST_TEST(workloadStepPSearchTestRealRaw, multiStepSel)
 {
     Disk* disk = new DiskSSD_Samsung840();
 
@@ -370,6 +371,163 @@ GTEST_TEST(workloadStepPSearchTestReal, multiStepSel)
     index->bulkloadEntries(10000);
 
     WorkloadStep* w = new WorkloadStepPSearch(index, 0.1, 2);
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME; id < WorkloadCounters::WORKLOAD_COUNTER_D_MAX_ITERATOR; ++id)
+    {
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounterValue(id), 0.0);
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounter(id).second, 0.0);
+    }
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
+    {
+        EXPECT_EQ(w->getCounters().getCounterValue(id), 0L);
+        EXPECT_EQ(w->getCounters().getCounter(id).second, 0L);
+    }
+
+    for (size_t i = 0; i < 100; ++i)
+    {
+        w->executeStep();
+
+        EXPECT_EQ(w->getCounters().getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS), 2000L);
+    }
+
+    delete w;
+    delete index;
+}
+
+GTEST_TEST(workloadStepPSearchTestRealColumn, interface)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+    FBDSM* fbdsm = new FBDSM(disk, std::vector<size_t>{8, 16, 32, 4, 4, 8});
+    DBIndexColumn* index = fbdsm;
+
+    index->bulkloadEntries(10000);
+
+    WorkloadStep* w = new WorkloadStepPSearch(index, static_cast<size_t>(100), std::vector<size_t>{0, 2, 3, 4});
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME; id < WorkloadCounters::WORKLOAD_COUNTER_D_MAX_ITERATOR; ++id)
+    {
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounterValue(id), 0.0);
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounter(id).second, 0.0);
+    }
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
+    {
+        EXPECT_EQ(w->getCounters().getCounterValue(id), 0L);
+        EXPECT_EQ(w->getCounters().getCounter(id).second, 0L);
+    }
+
+    w->executeStep();
+
+    EXPECT_NE(w->getCounters().getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS), 0L);
+
+    delete w;
+    delete index;
+}
+
+GTEST_TEST(workloadStepPSearchTestRealColumn, singleStep)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+    FBDSM* fbdsm = new FBDSM(disk, std::vector<size_t>{8, 16, 32, 4, 4, 8});
+    DBIndexColumn* index = fbdsm;
+
+    index->bulkloadEntries(10000);
+
+    WorkloadStep* w = new WorkloadStepPSearch(index, static_cast<size_t>(100), std::vector<size_t>{0, 2, 3, 4});
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME; id < WorkloadCounters::WORKLOAD_COUNTER_D_MAX_ITERATOR; ++id)
+    {
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounterValue(id), 0.0);
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounter(id).second, 0.0);
+    }
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
+    {
+        EXPECT_EQ(w->getCounters().getCounterValue(id), 0L);
+        EXPECT_EQ(w->getCounters().getCounter(id).second, 0L);
+    }
+
+    w->executeStep();
+
+    EXPECT_EQ(w->getCounters().getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS), 100L);
+
+    delete w;
+    delete index;
+}
+
+
+GTEST_TEST(workloadStepPSearchTestRealColumn, singleStepSel)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+    FBDSM* fbdsm = new FBDSM(disk, std::vector<size_t>{8, 16, 32, 4, 4, 8});
+    DBIndexColumn* index = fbdsm;
+
+    index->bulkloadEntries(10000);
+
+    WorkloadStep* w = new WorkloadStepPSearch(index, 0.1, std::vector<size_t>{0, 2, 3, 4}, 2);
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME; id < WorkloadCounters::WORKLOAD_COUNTER_D_MAX_ITERATOR; ++id)
+    {
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounterValue(id), 0.0);
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounter(id).second, 0.0);
+    }
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
+    {
+        EXPECT_EQ(w->getCounters().getCounterValue(id), 0L);
+        EXPECT_EQ(w->getCounters().getCounter(id).second, 0L);
+    }
+
+    w->executeStep();
+
+    EXPECT_EQ(w->getCounters().getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS), 2000L);
+
+    delete w;
+    delete index;
+}
+
+GTEST_TEST(workloadStepPSearchTestRealColumn, multiStep)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+    FBDSM* fbdsm = new FBDSM(disk, std::vector<size_t>{8, 16, 32, 4, 4, 8});
+    DBIndexColumn* index = fbdsm;
+
+    index->bulkloadEntries(10000);
+
+    WorkloadStep* w = new WorkloadStepPSearch(index, static_cast<size_t>(100), std::vector<size_t>{0, 2, 3, 4});
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME; id < WorkloadCounters::WORKLOAD_COUNTER_D_MAX_ITERATOR; ++id)
+    {
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounterValue(id), 0.0);
+        EXPECT_DOUBLE_EQ(w->getCounters().getCounter(id).second, 0.0);
+    }
+
+    for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
+    {
+        EXPECT_EQ(w->getCounters().getCounterValue(id), 0L);
+        EXPECT_EQ(w->getCounters().getCounter(id).second, 0L);
+    }
+
+    for (size_t i = 0; i < 100; ++i)
+    {
+        w->executeStep();
+
+        EXPECT_EQ(w->getCounters().getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS), 100L);
+    }
+
+    delete w;
+    delete index;
+}
+
+GTEST_TEST(workloadStepPSearchTestRealColumn, multiStepSel)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+    FBDSM* fbdsm = new FBDSM(disk, std::vector<size_t>{8, 16, 32, 4, 4, 8});
+    DBIndexColumn* index = fbdsm;
+
+    index->bulkloadEntries(10000);
+
+    WorkloadStep* w = new WorkloadStepPSearch(index, 0.1, std::vector<size_t>{0, 2, 3, 4}, 2);
 
     for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME; id < WorkloadCounters::WORKLOAD_COUNTER_D_MAX_ITERATOR; ++id)
     {

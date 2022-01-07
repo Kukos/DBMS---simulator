@@ -2,6 +2,7 @@
 #define WORKLOAD_STEP_HPP
 
 #include <index/dbIndex.hpp>
+#include <index/dbIndexColumn.hpp>
 #include <observability/workloadCounters.hpp>
 
 #include <string>
@@ -17,7 +18,10 @@ protected:
 
     WorkloadCounters counters;
 
-    DBIndex* index;
+    DBIndex* rIndex;
+    DBIndexColumn* cIndex;
+    bool isColumnIndexMode;
+    std::vector<size_t> columnsToSearch; // search when columnMode
 
     /**
      * @brief Collect counters from Index, Disk, Memory etc
@@ -40,7 +44,27 @@ protected:
      */
     virtual void finishStep() noexcept(true);
 
+    void setColumnsToSearch(const std::vector<size_t> columns)
+    {
+        columnsToSearch = columns;
+    }
+
 public:
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] name - Workload name
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] columnIndex - pointer to column index (wont be deallocated)
+     * @param[in] numOperations - how many the same operations will be perform in this step (used in insert, delete, search)
+     * @param[in] numEntriesPerOperations - how many entries push into 1 operation (used in bulkload, search)
+     * @param[in] selectivity - search selectivity (used only in search)
+     * @param[in] isColumnIndexMode - should be use columnIndex (true) or rawIndex (false)
+     * @param[in] col - columns to operate on in column mode
+     */
+    WorkloadStep(const char* name, DBIndex* index, DBIndexColumn* columnIndex, size_t numOperations, size_t numEntriesPerOperations, double selectivity, bool isColumnIndexMode, const std::vector<size_t>& col);
+
     /**
      * @brief Construct a new Workload Step object
      *
@@ -56,12 +80,45 @@ public:
      * @brief Construct a new Workload Step object
      *
      * @param[in] name - Workload name
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numOperations - how many the same operations will be perform in this step (used in insert, delete, search)
+     * @param[in] numEntriesPerOperations - how many entries push into 1 operation (used in bulkload, search)
+     * @param[in] selectivity - search selectivity (used only in search)
+     */
+    WorkloadStep(const char* name, DBIndexColumn* index, size_t numOperations, size_t numEntriesPerOperations, double selectivity);
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] name - Workload name
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numOperations - how many the same operations will be perform in this step (used in insert, delete, search)
+     * @param[in] numEntriesPerOperations - how many entries push into 1 operation (used in bulkload, search)
+     * @param[in] selectivity - search selectivity (used only in search)
+     * @param[in] col - columns to operate on in column mode
+     */
+    WorkloadStep(const char* name, DBIndexColumn* index, size_t numOperations, size_t numEntriesPerOperations, double selectivity, const std::vector<size_t>& col);
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] name - Workload name
      * @param[in] numOperations - how many the same operations will be perform in this step (used in insert, delete, search)
      * @param[in] numEntriesPerOperations - how many entries push into 1 operation (used in bulkload, search)
      * @param[in] selectivity - search selectivity (used only in search)
      */
     WorkloadStep(const char* name, size_t numOperations, size_t numEntriesPerOperations, double selectivity);
 
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] name - Workload name
+     * @param[in] numOperations - how many the same operations will be perform in this step (used in insert, delete, search)
+     * @param[in] numEntriesPerOperations - how many entries push into 1 operation (used in bulkload, search)
+     * @param[in] selectivity - search selectivity (used only in search)
+     * @param[in] col - columns to operate on in column mode
+     */
+    WorkloadStep(const char* name, size_t numOperations, size_t numEntriesPerOperations, double selectivity, const std::vector<size_t>& col);
 
     /**
      * @brief Set the Db Index object
@@ -70,7 +127,19 @@ public:
      */
     void setDbIndex(DBIndex* index)
     {
-        this->index = index;
+        rIndex = index;
+        isColumnIndexMode = false;
+    }
+
+    /**
+     * @brief Set the Db Index object
+     *
+     * @param[in] index - DBIndex to set into workload
+     */
+    void setDbIndex(DBIndexColumn* index)
+    {
+        cIndex = index;
+        isColumnIndexMode = true;
     }
 
     /**

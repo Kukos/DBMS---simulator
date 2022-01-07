@@ -22,10 +22,48 @@ public:
     /**
      * @brief Construct a new Workload Step object
      *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numEntriesToPSearch - how many entries pushed to search operation
+     */
+    WorkloadStepPSearch(DBIndexColumn* index, size_t numEntriesToPSearch)
+    : WorkloadStep("WorkloadStepPointSearch", index, numEntriesToPSearch, 1, 0.0)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numEntriesToPSearch - how many entries pushed to search operation
+     * @param[in] col - columns to search
+     */
+    WorkloadStepPSearch(DBIndexColumn* index, size_t numEntriesToPSearch, const std::vector<size_t>& col)
+    : WorkloadStep("WorkloadStepPointSearch", index, numEntriesToPSearch, 1, 0.0, col)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
      * @param[in] numEntriesToPSearch - how many entries pushed to search operation
      */
     WorkloadStepPSearch(size_t numEntriesToPSearch)
-    : WorkloadStep("WorkloadStepPointSearch", nullptr, numEntriesToPSearch, 1, 0.0)
+    : WorkloadStep("WorkloadStepPointSearch", static_cast<DBIndex*>(nullptr), numEntriesToPSearch, 1, 0.0)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numEntriesToPSearch - how many entries pushed to search operation
+     * @param[in] col - columns to search
+     */
+    WorkloadStepPSearch(size_t numEntriesToPSearch, const std::vector<size_t>& col)
+    : WorkloadStep("WorkloadStepPointSearch", static_cast<DBIndexColumn*>(nullptr), numEntriesToPSearch, 1, 0.0, col)
     {
 
     }
@@ -46,14 +84,55 @@ public:
     /**
      * @brief Construct a new Workload Step object
      *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] selectivity - search selectivity
+     * @param[in] numOperations - how many operations perfromed (default 1)
+     */
+    WorkloadStepPSearch(DBIndexColumn* index, double selectivity, size_t numOperations = 1)
+    : WorkloadStep("WorkloadStepPointSearch", index, numOperations, 0, selectivity)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] selectivity - search selectivity
+     * @param[in] col - columns to search
+     * @param[in] numOperations - how many operations perfromed (default 1)
+     */
+    WorkloadStepPSearch(DBIndexColumn* index, double selectivity, const std::vector<size_t>& col, size_t numOperations = 1)
+    : WorkloadStep("WorkloadStepPointSearch", index, numOperations, 0, selectivity, col)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
      * @param[in] selectivity - search selectivity
      * @param[in] numOperations - how many operations perfromed (default 1)
      */
     WorkloadStepPSearch(double selectivity, size_t numOperations = 1)
-    : WorkloadStep("WorkloadStepPointSearch", nullptr, numOperations, 0, selectivity)
+    : WorkloadStep("WorkloadStepPointSearch",  static_cast<DBIndex*>(nullptr), numOperations, 0, selectivity)
     {
 
     }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
+     * @param[in] selectivity - search selectivity
+     * @param[in] col - columns to search
+     * @param[in] numOperations - how many operations perfromed (default 1)
+     */
+    WorkloadStepPSearch(double selectivity, const std::vector<size_t>& col, size_t numOperations = 1)
+    : WorkloadStep("WorkloadStepPointSearch",  static_cast<DBIndexColumn*>(nullptr), numOperations, 0, selectivity, col)
+    {
+
+    }
+
 
     /**
     * @brief Virtual constructor idiom implemented as clone function. This function creates new WorkloadStep
@@ -74,7 +153,7 @@ public:
      */
     virtual double executeStep() noexcept(true)
     {
-        if (index == nullptr)
+        if ((isColumnIndexMode == false && rIndex == nullptr) || (isColumnIndexMode == true && cIndex == nullptr))
         {
             LOGGER_LOG_ERROR("Index is not set (nullptr)");
             return 0.0;
@@ -84,10 +163,20 @@ public:
 
         double time = 0.0;
 
-        if (numEntriesPerOperations == 0) // selectivity is non-zero
-            time = index->findPointEntries(selectivity, numOperations);
+        if (isColumnIndexMode == false)
+        {
+            if (numEntriesPerOperations == 0) // selectivity is non-zero
+                time = rIndex->findPointEntries(selectivity, numOperations);
+            else
+                time = rIndex->findPointEntries(numOperations);
+        }
         else
-            time = index->findPointEntries(numOperations);
+        {
+            if (numEntriesPerOperations == 0) // selectivity is non-zero
+                time = cIndex->findPointEntries(columnsToSearch, selectivity, numOperations);
+            else
+                time = cIndex->findPointEntries(columnsToSearch, numOperations);
+        }
 
         finishStep();
 

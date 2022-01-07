@@ -22,10 +22,22 @@ public:
     /**
      * @brief Construct a new Workload Step object
      *
+     * @param[in] index - pointer to index (wont be deallocated)
+     * @param[in] numEntriesToDelete - how many entries pushed to delete operation
+     */
+    WorkloadStepDelete(DBIndexColumn* index, size_t numEntriesToDelete)
+    : WorkloadStep("WorkloadStepDelete", index, numEntriesToDelete, 1, 0.0)
+    {
+
+    }
+
+    /**
+     * @brief Construct a new Workload Step object
+     *
      * @param[in] numEntriesToDelete - how many entries pushed to delete operation
      */
     WorkloadStepDelete(size_t numEntriesToDelete)
-    : WorkloadStep("WorkloadStepDelete", nullptr, numEntriesToDelete, 1, 0.0)
+    : WorkloadStep("WorkloadStepDelete", static_cast<DBIndex*>(nullptr), numEntriesToDelete, 1, 0.0)
     {
 
     }
@@ -48,7 +60,7 @@ public:
      */
     virtual double executeStep() noexcept(true) override
     {
-        if (index == nullptr)
+        if ((isColumnIndexMode == false && rIndex == nullptr) || (isColumnIndexMode == true && cIndex == nullptr))
         {
             LOGGER_LOG_ERROR("Index is not set (nullptr)");
             return 0.0;
@@ -56,7 +68,7 @@ public:
 
         prepareStep();
 
-        const double time = index->deleteEntries(numOperations);
+        const double time = isColumnIndexMode == false ? rIndex->deleteEntries(numOperations) : cIndex->deleteEntries(numOperations);
 
         finishStep();
 
