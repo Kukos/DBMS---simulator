@@ -52,6 +52,27 @@ GTEST_TEST(dsmBasicTest, interface)
     delete index;
 }
 
+GTEST_TEST(dsmBasicTest, topology)
+{
+    Disk* ssd = new DiskSSD_Samsung840();
+
+    const std::vector<size_t> columns = {8, 16, 32, 4, 4, 8};
+    const size_t numEntries = 1000000000;
+
+    DSM* dsm = new DSM(ssd, columns);
+    DBIndexColumn* index = dsm;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(index->getNumEntries(), numEntries);
+
+    delete index;
+}
+
 
 GTEST_TEST(dsmBasicTest, insert)
 {

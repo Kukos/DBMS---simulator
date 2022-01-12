@@ -217,6 +217,11 @@ public:
         return findRangeEntries(static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
     }
 
+    void createTopologyAfterInsert(size_t numEntries) noexcept(true)
+    {
+        this->numEntries += numEntries;
+    }
+
     DBIndexTest(Disk* disk, size_t sizeKey, size_t sizeData)
     : DBIndex("Index", disk, sizeKey, sizeData)
     {
@@ -859,6 +864,37 @@ GTEST_TEST(generalDBIndexBasicTest, resetState)
     EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
     EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second, 0);
     EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_TIME).second, 0.0);
+
+    delete index;
+}
+
+GTEST_TEST(generalDBIndexBasicTest, topology)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+
+    MemoryControllerTest* memoryController = new MemoryControllerTest(modelName, pageSize, readTime, writeTime);
+    Disk disk(memoryController);
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t numEntries = 10000;
+
+    DBIndex* index = new DBIndexTest(new Disk(std::move(disk)), keySize, dataSize);
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 0);
+    EXPECT_EQ(index->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, 0);
+    EXPECT_DOUBLE_EQ(index->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(index->getNumEntries(), numEntries);
 
     delete index;
 }

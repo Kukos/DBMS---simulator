@@ -180,6 +180,74 @@ double LSMTree::mergeBufferTree() noexcept(true)
     return time;
 }
 
+double LSMTree::mergeBufferTreeFake() noexcept(true)
+{
+    double time = 0.0;
+
+    auto lvl = std::ref(levels[0]);
+
+    LOGGER_LOG_DEBUG("Fake Merging LSM BufferTree ({} + {} = {}) / {} with LSM LVL{} ({} + {} = {}) / {}",
+                     bufferTree.numEntries,
+                     bufferTree.numEntriesToDelete,
+                     bufferTree.numEntries + bufferTree.numEntriesToDelete,
+                     bufferTree.maxEntries,
+                     lvl.get().getLvl(),
+                     lvl.get().numEntries,
+                     lvl.get().numEntriesToDelete,
+                     lvl.get().numEntries + lvl.get().numEntriesToDelete,
+                     lvl.get().maxEntries);
+
+    if (lvl.get().willBeFullAfterMerge(bufferTree))
+    {
+        if (getHeight() < 2)
+            addLevel();
+
+        const double mergeTime = mergeLevelsFake(0, 1);
+        lvl = std::ref(levels[0]);
+        auto lower = std::ref(levels[1]);
+
+        LOGGER_LOG_DEBUG("LVL{} FAKE merged with LVL{} took {}s, now LVL{} ({} + {} = {}) / {}, LVL{} ({} + {} = {}) / {}",
+                         lvl.get().getLvl(),
+                         lower.get().getLvl(),
+                         mergeTime,
+                         lvl.get().getLvl(),
+                         lvl.get().numEntries,
+                         lvl.get().numEntriesToDelete,
+                         lvl.get().numEntries + lvl.get().numEntriesToDelete,
+                         lvl.get().maxEntries,
+                         lower.get().getLvl(),
+                         lower.get().numEntries,
+                         lower.get().numEntriesToDelete,
+                         lower.get().numEntries + lower.get().numEntriesToDelete,
+                         lower.get().maxEntries);
+
+        time += mergeTime;
+    }
+
+    // how many entries (normal) will stay in lvl0
+    const size_t entriesAfterMerge = lvl.get().numEntries > bufferTree.numEntriesToDelete ? lvl.get().numEntries - bufferTree.numEntriesToDelete + bufferTree.numEntries : bufferTree.numEntries;
+
+    // how many entries (to delete) will stay in lvl0
+    const size_t entriesToDeleteAfterMerge = bufferTree.numEntriesToDelete > lvl.get().numEntries ? bufferTree.numEntriesToDelete - lvl.get().numEntries + lvl.get().numEntriesToDelete : lvl.get().numEntriesToDelete;
+
+    LOGGER_LOG_TRACE("MergeBufferFAKE: entriesAfterMerge = {}, entriesToDeleteAfterMerge={}, reading from LSM LVL{} {} bytes, writing into LSM LVL{} {} bytes",
+                     entriesAfterMerge,
+                     entriesToDeleteAfterMerge,
+                     lvl.get().getLvl(),
+                     (lvl.get().numEntries + lvl.get().numEntriesToDelete) * getRecordSize(),
+                     lvl.get().getLvl(),
+                     (entriesAfterMerge + entriesToDeleteAfterMerge) * getRecordSize());
+
+    // update metadata
+    bufferTree.numEntries = 0;
+    bufferTree.numEntriesToDelete = 0;
+
+    lvl.get().numEntries = entriesAfterMerge;
+    lvl.get().numEntriesToDelete = entriesToDeleteAfterMerge;
+
+    return time;
+}
+
 double LSMTree::mergeLevels(size_t upperLvl, size_t lowerLvl) noexcept(true)
 {
     double time = 0.0;
@@ -266,6 +334,79 @@ double LSMTree::mergeLevels(size_t upperLvl, size_t lowerLvl) noexcept(true)
 
     return time;
 }
+
+double LSMTree::mergeLevelsFake(size_t upperLvl, size_t lowerLvl) noexcept(true)
+{
+    double time = 0.0;
+
+    auto upper = std::ref(levels[upperLvl]);
+    auto lower = std::ref(levels[lowerLvl]);
+    LOGGER_LOG_DEBUG("FAKE Merging LSM LVL{} ({} + {} = {}) / {} with LSM LVL{} ({} + {} = {}) / {}",
+                     upper.get().getLvl(),
+                     upper.get().numEntries,
+                     upper.get().numEntriesToDelete,
+                     upper.get().numEntries + upper.get().numEntriesToDelete,
+                     upper.get().maxEntries,
+                     lower.get().getLvl(),
+                     lower.get().numEntries,
+                     lower.get().numEntriesToDelete,
+                     lower.get().numEntries + lower.get().numEntriesToDelete,
+                     lower.get().maxEntries);
+
+    if (lower.get().willBeFullAfterMerge(upper))
+    {
+        if (getHeight() < lower.get().getLvl() + 1)
+            addLevel();
+
+        const double mergeTime = mergeLevelsFake(lowerLvl, lowerLvl + 1);
+        upper = std::ref(levels[upperLvl]);
+        lower = std::ref(levels[lowerLvl]);
+        auto lowerLow = std::ref(levels[lowerLvl + 1]);
+
+        LOGGER_LOG_DEBUG("LSM LVL{} FAKE merged with LSM LVL{} took {}s, now LSM LVL{} ({} + {} = {}) / {}, LSM LVL{} ({} + {} = {}) / {}",
+                         lower.get().getLvl(),
+                         lowerLow.get().getLvl(),
+                         mergeTime,
+                         lower.get().lvl,
+                         lower.get().numEntries,
+                         lower.get().numEntriesToDelete,
+                         lower.get().numEntries + lower.get().numEntriesToDelete,
+                         lower.get().maxEntries,
+                         lowerLow.get().lvl,
+                         lowerLow.get().numEntries,
+                         lowerLow.get().numEntriesToDelete,
+                         lowerLow.get().numEntries + lowerLow.get().numEntriesToDelete,
+                         lowerLow.get().maxEntries);
+
+        time += mergeTime;
+    }
+
+    // how many entries (normal) will stay in lvl lower
+    const size_t entriesAfterMerge = lower.get().numEntries > upper.get().numEntriesToDelete ? lower.get().numEntries - upper.get().numEntriesToDelete + upper.get().numEntries : upper.get().numEntries;
+
+    // how many entries (to delete) will stay in lvl lower
+    const size_t entriesToDeleteAfterMerge = upper.get().numEntriesToDelete > lower.get().numEntries ? upper.get().numEntriesToDelete - lower.get().numEntries + lower.get().numEntriesToDelete : lower.get().numEntriesToDelete;
+
+    LOGGER_LOG_TRACE("MergeLevels FAKE: entriesAfterMerge = {}, entriesToDeleteAfterMerge={}, reading from LSM LVL{} {} bytes, reading from LSM LVL{} {} bytes, writting into LSM LVL{} bytes",
+                     entriesAfterMerge,
+                     entriesToDeleteAfterMerge,
+                     upper.get().getLvl(),
+                     (upper.get().numEntries + upper.get().numEntriesToDelete) * getRecordSize(),
+                     lower.get().getLvl(),
+                     (lower.get().numEntries + lower.get().numEntriesToDelete) * getRecordSize(),
+                     lower.get().getLvl(),
+                     (entriesAfterMerge + entriesToDeleteAfterMerge) * getRecordSize());
+
+    // update metadata
+    upper.get().numEntries = 0;
+    upper.get().numEntriesToDelete = 0;
+
+    lower.get().numEntries = entriesAfterMerge;
+    lower.get().numEntriesToDelete = entriesToDeleteAfterMerge;
+
+    return time;
+}
+
 
 double LSMTree::addEntriesToLevel(size_t lvl, size_t entries) noexcept(true)
 {
@@ -685,4 +826,26 @@ double LSMTree::findRangeEntries(double selectivity, size_t numOperations) noexc
     LOGGER_LOG_TRACE("selectivity={}, numOperations={}, call findRangeEntries({}, {})", selectivity, numOperations, static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
 
     return findRangeEntries(static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
+}
+
+void LSMTree::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    LOGGER_LOG_DEBUG("Creating a topology now entries={}, inserting new {} entries, after we will have {} entries", this->numEntries, numEntries, this->numEntries + numEntries);
+
+    while (numEntries > 0)
+    {
+        const size_t entriesToInsert = std::min(numEntries, bufferTree.maxEntries - (bufferTree.numEntries + bufferTree.numEntriesToDelete));
+
+        this->numEntries += entriesToInsert;
+        bufferTree.numEntries += entriesToInsert;
+        if (bufferTree.isFull())
+        {
+            if (getHeight() == 0)
+                addLevel();
+
+            (void)mergeBufferTreeFake();
+        }
+
+        numEntries -= entriesToInsert;
+    }
 }

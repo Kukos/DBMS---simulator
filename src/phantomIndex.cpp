@@ -148,3 +148,10 @@ double PhantomIndex::findRangeEntries(double selectivity, size_t numOperations) 
 
     return findRangeEntries(static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
 }
+
+void PhantomIndex::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    LOGGER_LOG_DEBUG("Creating a topology now entries={}, inserting new {} entries, after we will have {} entries", this->numEntries, numEntries, this->numEntries + numEntries);
+
+    this->numEntries += numEntries;
+}

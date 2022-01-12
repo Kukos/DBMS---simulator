@@ -178,6 +178,75 @@ double FDTree::mergeHeadTree() noexcept(true)
     return time;
 }
 
+double FDTree::mergeHeadTreeFake() noexcept(true)
+{
+    double time = 0.0;
+
+    auto lvl = std::ref(levels[0]);
+
+    LOGGER_LOG_DEBUG("FAKE Merging FD HeadTree ({} + {} = {}) / {} with FD LVL{} ({} + {} = {}) / {}",
+                     headTree.numEntries,
+                     headTree.numEntriesToDelete,
+                     headTree.numEntries + headTree.numEntriesToDelete,
+                     headTree.maxEntries,
+                     lvl.get().getLvl(),
+                     lvl.get().numEntries,
+                     lvl.get().numEntriesToDelete,
+                     lvl.get().numEntries + lvl.get().numEntriesToDelete,
+                     lvl.get().maxEntries);
+
+    if (lvl.get().willBeFullAfterMerge(headTree))
+    {
+        if (getHeight() < 2)
+            addLevel();
+
+        const double mergeTime = mergeLevelsFake(0, 1);
+        lvl = std::ref(levels[0]);
+        auto lower = std::ref(levels[1]);
+
+        LOGGER_LOG_DEBUG("LVL{} FAKE merged with LVL{} took {}s, now LVL{} ({} + {} = {}) / {}, LVL{} ({} + {} = {}) / {}",
+                         lvl.get().getLvl(),
+                         lower.get().getLvl(),
+                         mergeTime,
+                         lvl.get().getLvl(),
+                         lvl.get().numEntries,
+                         lvl.get().numEntriesToDelete,
+                         lvl.get().numEntries + lvl.get().numEntriesToDelete,
+                         lvl.get().maxEntries,
+                         lower.get().getLvl(),
+                         lower.get().numEntries,
+                         lower.get().numEntriesToDelete,
+                         lower.get().numEntries + lower.get().numEntriesToDelete,
+                         lower.get().maxEntries);
+
+        time += mergeTime;
+    }
+
+    // how many entries (normal) will stay in lvl0
+    const size_t entriesAfterMerge = lvl.get().numEntries > headTree.numEntriesToDelete ? lvl.get().numEntries - headTree.numEntriesToDelete + headTree.numEntries : headTree.numEntries;
+
+    // how many entries (to delete) will stay in lvl0
+    const size_t entriesToDeleteAfterMerge = headTree.numEntriesToDelete > lvl.get().numEntries ? headTree.numEntriesToDelete - lvl.get().numEntries + lvl.get().numEntriesToDelete : lvl.get().numEntriesToDelete;
+
+    LOGGER_LOG_TRACE("Fake MergeHeadTree: entriesAfterMerge = {}, entriesToDeleteAfterMerge={}, reading from FD LVL{} {} bytes, writing into FD LVL{} {} bytes",
+                     entriesAfterMerge,
+                     entriesToDeleteAfterMerge,
+                     lvl.get().getLvl(),
+                     (lvl.get().numEntries + lvl.get().numEntriesToDelete) * getRecordSize(),
+                     lvl.get().getLvl(),
+                     (entriesAfterMerge + entriesToDeleteAfterMerge) * getRecordSize());
+
+    // update metadata
+    headTree.numEntries = 0;
+    headTree.numEntriesToDelete = 0;
+
+    lvl.get().numEntries = entriesAfterMerge;
+    lvl.get().numEntriesToDelete = entriesToDeleteAfterMerge;
+
+    return time;
+}
+
+
 double FDTree::mergeLevels(size_t upperLvl, size_t lowerLvl) noexcept(true)
 {
     double time = 0.0;
@@ -271,6 +340,81 @@ double FDTree::mergeLevels(size_t upperLvl, size_t lowerLvl) noexcept(true)
 
     return time;
 }
+
+double FDTree::mergeLevelsFake(size_t upperLvl, size_t lowerLvl) noexcept(true)
+{
+    double time = 0.0;
+
+    auto upper = std::ref(levels[upperLvl]);
+    auto lower = std::ref(levels[lowerLvl]);
+    LOGGER_LOG_DEBUG("FAKE Merging FD LVL{} ({} + {} = {}) / {} with FD LVL{} ({} + {} = {}) / {}",
+                     upper.get().getLvl(),
+                     upper.get().numEntries,
+                     upper.get().numEntriesToDelete,
+                     upper.get().numEntries + upper.get().numEntriesToDelete,
+                     upper.get().maxEntries,
+                     lower.get().getLvl(),
+                     lower.get().numEntries,
+                     lower.get().numEntriesToDelete,
+                     lower.get().numEntries + lower.get().numEntriesToDelete,
+                     lower.get().maxEntries);
+
+    if (lower.get().willBeFullAfterMerge(upper))
+    {
+        if (getHeight() < lower.get().getLvl() + 1)
+            addLevel();
+
+        const double mergeTime = mergeLevelsFake(lowerLvl, lowerLvl + 1);
+        upper = std::ref(levels[upperLvl]);
+        lower = std::ref(levels[lowerLvl]);
+        auto lowerLow = std::ref(levels[lowerLvl + 1]);
+
+        LOGGER_LOG_DEBUG("FD LVL{} FAKE merged with FD LVL{} took {}s, now FD LVL{} ({} + {} = {}) / {}, FD LVL{} ({} + {} = {}) / {}",
+                         lower.get().getLvl(),
+                         lowerLow.get().getLvl(),
+                         mergeTime,
+                         lower.get().lvl,
+                         lower.get().numEntries,
+                         lower.get().numEntriesToDelete,
+                         lower.get().numEntries + lower.get().numEntriesToDelete,
+                         lower.get().maxEntries,
+                         lowerLow.get().lvl,
+                         lowerLow.get().numEntries,
+                         lowerLow.get().numEntriesToDelete,
+                         lowerLow.get().numEntries + lowerLow.get().numEntriesToDelete,
+                         lowerLow.get().maxEntries);
+
+        time += mergeTime;
+    }
+
+    // how many entries (normal) will stay in lvl lower
+    const size_t entriesAfterMerge = lower.get().numEntries > upper.get().numEntriesToDelete ? lower.get().numEntries - upper.get().numEntriesToDelete + upper.get().numEntries : upper.get().numEntries;
+
+    // how many entries (to delete) will stay in lvl lower
+    const size_t entriesToDeleteAfterMerge = upper.get().numEntriesToDelete > lower.get().numEntries ? upper.get().numEntriesToDelete - lower.get().numEntries + lower.get().numEntriesToDelete : lower.get().numEntriesToDelete;
+
+    LOGGER_LOG_TRACE("FAKE MergeLevels: entriesAfterMerge = {}, entriesToDeleteAfterMerge={}, reading from FD LVL{} {} bytes, writting into FD LVL{} bytes, reading from FD LVL{} {} bytes, writting into FD LVL{} bytes",
+                     entriesAfterMerge,
+                     entriesToDeleteAfterMerge,
+                     upper.get().getLvl(),
+                     (upper.get().numEntries + upper.get().numEntriesToDelete) * getRecordSize(),
+                     upper.get().getLvl(),
+                     (entriesAfterMerge + entriesToDeleteAfterMerge) / nodeSize * sizeof(void*),
+                     lower.get().getLvl(),
+                     (lower.get().numEntries + lower.get().numEntriesToDelete) * getRecordSize(),
+                     lower.get().getLvl(),
+                     (entriesAfterMerge + entriesToDeleteAfterMerge) * getRecordSize());
+
+    // update metadata
+    upper.get().numEntries = 0;
+    upper.get().numEntriesToDelete = 0;
+
+    lower.get().numEntries = entriesAfterMerge;
+    lower.get().numEntriesToDelete = entriesToDeleteAfterMerge;
+
+    return time;
+}
+
 
 double FDTree::insertEntriesHelper(size_t numOperations) noexcept(true)
 {
@@ -507,4 +651,26 @@ double FDTree::findRangeEntries(double selectivity, size_t numOperations) noexce
     LOGGER_LOG_TRACE("selectivity={}, numOperations={}, call findRangeEntries({}, {})", selectivity, numOperations, static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
 
     return findRangeEntries(static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
+}
+
+void FDTree::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    LOGGER_LOG_DEBUG("Creating a topology now entries={}, inserting new {} entries, after we will have {} entries", this->numEntries, numEntries, this->numEntries + numEntries);
+
+    while (numEntries > 0)
+    {
+        const size_t entriesToInsert = std::min(numEntries, headTree.maxEntries - (headTree.numEntries + headTree.numEntriesToDelete));
+
+        this->numEntries += entriesToInsert;
+        headTree.numEntries += entriesToInsert;
+        if (headTree.isFull())
+        {
+            if (getHeight() == 0)
+                addLevel();
+
+            (void)mergeHeadTreeFake();
+        }
+
+        numEntries -= entriesToInsert;
+    }
 }

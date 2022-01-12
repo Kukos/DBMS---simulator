@@ -57,6 +57,28 @@ GTEST_TEST(cbptreeBasicSSDTest, interface)
     delete index;
 }
 
+GTEST_TEST(cbptreeBasicSSDTest, topology)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t nodeSize = disk->getLowLevelController().getPageSize();
+    const size_t numEntries = 1000000000;
+
+    CBPTree* bp = new CBPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* index = bp;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 4);
+
+    delete index;
+}
+
 GTEST_TEST(cbptreeBasicSSDTest, copy)
 {
     Disk* disk = new DiskSSD_Samsung840();
@@ -1520,6 +1542,28 @@ GTEST_TEST(cbptreeBasicPCMTest, deleteFromInner)
             EXPECT_EQ(cbp->getHeight(), (j == 3 ? 1 : 2));
         }
     }
+
+    delete index;
+}
+
+GTEST_TEST(cbptreeBasicPCMTest, topology)
+{
+    Disk* disk = new DiskPCM_DefaultModel();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t nodeSize = disk->getLowLevelController().getPageSize() * 8;
+    const size_t numEntries = 1000000000;
+
+    CBPTree* bp = new CBPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* index = bp;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 7);
 
     delete index;
 }

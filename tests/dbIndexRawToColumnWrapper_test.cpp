@@ -268,6 +268,32 @@ GTEST_TEST(dbIndexRawToColumnBPTreeSSDBasicTest, move)
     delete index;
 }
 
+GTEST_TEST(dbIndexRawToColumnBPTreeSSDBasicTest, topology)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 16 + 32 + 4 + 4 + 8;
+    const std::vector<size_t> columns = {8, 16, 32, 4, 4, 8};
+    const size_t nodeSize = disk->getLowLevelController().getPageSize();
+    const size_t numEntries = 1000000000;
+
+    BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* rawIndex = bp;
+
+    DBIndexColumn* index = new DBIndexRawToColumnWrapper(rawIndex, columns);
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 4);
+
+    delete index;
+}
+
+
 GTEST_TEST(dbIndexRawToColumnBPTreeSSDBasicTest, insertIntoRoot)
 {
     Disk* disk = new DiskSSD_Samsung840();

@@ -64,6 +64,47 @@ GTEST_TEST(lsmtreeBasicTest, interface)
     delete index;
 }
 
+GTEST_TEST(lsmtreeBasicTest, topology)
+{
+    Disk* ssd = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t recordSize = keySize + dataSize;
+    const size_t nodeSize = ssd->getLowLevelController().getPageSize() * 10;
+    const size_t headTreeSize = nodeSize;
+    const size_t lvlRatio = 5;
+    const size_t numOperations = ((headTreeSize / recordSize) - 1) * std::pow(lvlRatio, 5);
+
+    LSMTree* lsm = new LSMTree(ssd, keySize, dataSize, nodeSize, headTreeSize, lvlRatio);
+    DBIndex* index = lsm;
+
+    index->createTopologyAfterInsert(numOperations);
+
+    EXPECT_EQ(index->getNumEntries(), numOperations);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    const size_t expectedHeight = 5;
+    EXPECT_EQ(lsm->getHeight(), expectedHeight);
+
+    const size_t entriesPerLvl[] = {286, 2274, 22740, 113700, 568500, 2842500};
+    ASSERT_EQ(std::accumulate(entriesPerLvl, entriesPerLvl + expectedHeight + 1, 0), numOperations);
+
+    for (size_t i = 0; i <= expectedHeight; ++i)
+    {
+        EXPECT_EQ(lsm->getLSMLvl(i).getNumEntries(), entriesPerLvl[i]);
+        EXPECT_LT(lsm->getLSMLvl(i).getNumEntries() + lsm->getLSMLvl(i).getNumEntriesToDelete(), lsm->getLSMLvl(i).getMaxEntries());
+        EXPECT_EQ(lsm->getLSMLvl(i).getLvl(), i);
+        EXPECT_EQ(lsm->getLSMLvl(i).getNumEntriesToDelete(), 0);
+        EXPECT_EQ(lsm->getLSMLvl(i).getMaxEntries(), (headTreeSize * static_cast<size_t>(std::floor(std::pow(lvlRatio, i)))) / recordSize);
+        EXPECT_EQ(lsm->getLSMLvl(i).getNumOfNodes(), std::pow(lvlRatio, i));
+    }
+
+    delete index;
+}
+
+
 GTEST_TEST(lsmtreeBasicTest, insertIntoBufferTree)
 {
     Disk* ssd = new DiskSSD_Samsung840();

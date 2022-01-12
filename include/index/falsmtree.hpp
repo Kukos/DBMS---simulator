@@ -98,7 +98,9 @@ private:
     void addLevel() noexcept(true);
 
     double mergeBufferTree() noexcept(true);
+    double mergeBufferTreeFake() noexcept(true);
     double mergeLevels(size_t upperLvl, size_t lowerLvl) noexcept(true);
+    double mergeLevelsFake(size_t upperLvl, size_t lowerLvl) noexcept(true);
     double addEntriesToLevel(size_t lvl, size_t entries) noexcept(true);
 
     double insertEntriesHelper(size_t numOperations) noexcept(true);
@@ -264,6 +266,16 @@ public:
      * @return time needed to evaluates the operations
      */
     virtual double findRangeEntries(double selectivity, size_t numOperations = 1) noexcept(true) override;
+
+    /**
+     * @brief Fake the insert of numEntries entries to create a topology in fastest way.
+     *        This should be used only to test non-empty index in workloads, so this is a total fakeout.
+     *        No low-level simulation is done here. We are simulating only insert index code without involving disk simulator.
+     *        Counters wouldnt be pegged
+     *
+     * @param[in] numEntries - how entries to insert to create a topology
+     */
+    virtual void createTopologyAfterInsert(size_t numEntries = 1) noexcept(true) override;
 
     virtual ~FALSMTree() = default;
     FALSMTree() = default;

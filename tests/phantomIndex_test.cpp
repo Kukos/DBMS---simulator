@@ -176,6 +176,22 @@ GTEST_TEST(phantomIndexBasicSSDTest, move)
     delete index;
 }
 
+GTEST_TEST(phantomIndexBasicSSDTest, topology)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+
+    PhantomIndex* ph = new PhantomIndex(disk);
+    DBIndex* index = ph;
+    const size_t numEntries = 1000000000;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    delete index;
+}
+
 GTEST_TEST(phantomIndexBasicSSDTest, insert)
 {
     Disk* disk = new DiskSSD_Samsung840();
@@ -312,7 +328,6 @@ GTEST_TEST(phantomIndexBasicSSDTest, delete)
     delete index;
 }
 
-
 GTEST_TEST(phantomIndexBasicPCMTest, interface)
 {
     Disk* disk = new DiskPCM_DefaultModel();
@@ -351,6 +366,22 @@ GTEST_TEST(phantomIndexBasicPCMTest, interface)
     EXPECT_EQ(index->getDataSize(), 0);
     EXPECT_EQ(index->getRecordSize(), 0);
     EXPECT_EQ(index->isBulkloadSupported(), false);
+
+    delete index;
+}
+
+GTEST_TEST(phantomIndexBasicPCMTest, topology)
+{
+    Disk* disk = new DiskPCM_DefaultModel();
+
+    PhantomIndex* ph = new PhantomIndex(disk);
+    DBIndex* index = ph;
+    const size_t numEntries = 1000000000;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
 
     delete index;
 }

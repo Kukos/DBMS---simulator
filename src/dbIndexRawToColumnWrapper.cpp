@@ -142,3 +142,8 @@ DBIndexRawToColumnWrapper& DBIndexRawToColumnWrapper::operator=(const DBIndexRaw
 
     return *this;
 }
+
+void DBIndexRawToColumnWrapper::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    rawIndex->createTopologyAfterInsert(numEntries);
+}

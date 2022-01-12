@@ -217,6 +217,11 @@ public:
         return findRangeEntries(columnsToFetch, static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
     }
 
+    void createTopologyAfterInsert(size_t numEntries) noexcept(true)
+    {
+        this->numEntries += numEntries;
+    }
+
     DBIndexColumnTest(Disk* disk, const std::vector<size_t>& columnsSize)
     : DBIndexColumn("ColumnIndex", disk, columnsSize)
     {
@@ -909,6 +914,37 @@ GTEST_TEST(generalDBIndexColumnBasicTest, resetState)
     EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
     EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second, 0);
     EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_TIME).second, 0.0);
+
+    delete index;
+}
+
+
+GTEST_TEST(generalDBIndexColumnBasicTest, topology)
+{
+    const char* const modelName = "testModel";
+    const size_t pageSize = 2048;
+    const double readTime = 0.1;
+    const double writeTime = 4.4;
+
+    MemoryControllerTest* memoryController = new MemoryControllerTest(modelName, pageSize, readTime, writeTime);
+    Disk disk(memoryController);
+
+    const size_t entriesToInsert = 100000;
+
+    std::vector<size_t> columns = {8, 10, 20, 50, 100};
+    DBIndexColumn* index = new DBIndexColumnTest(new Disk(std::move(disk)), columns);
+
+    index->createTopologyAfterInsert(entriesToInsert);
+
+    EXPECT_EQ(index->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS).second, 0);
+    EXPECT_EQ(index->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second, 0);
+    EXPECT_DOUBLE_EQ(index->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(index->getNumEntries(), entriesToInsert);
 
     delete index;
 }

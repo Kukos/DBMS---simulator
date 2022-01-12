@@ -299,3 +299,9 @@ double CFDTree::findRangeEntries(const std::vector<size_t>& columnsToFetch, doub
 
     return time;
 }
+
+void CFDTree::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    for (size_t i = 0; i < fdColumns.size(); ++i)
+        fdColumns[i].createTopologyAfterInsert(numEntries);
+}

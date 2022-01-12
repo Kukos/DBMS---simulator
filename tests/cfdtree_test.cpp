@@ -67,6 +67,55 @@ GTEST_TEST(cfdtreeBasicTest, interface)
     delete index;
 }
 
+GTEST_TEST(cfdtreeBasicTest, topology)
+{
+    Disk* ssd = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 16 + 32 + 4 + 4 + 8;
+    const std::vector<size_t> columns = {8, 16, 32, 4, 4, 8};
+    const size_t recordSize = keySize + dataSize;
+    const size_t nodeSize = ssd->getLowLevelController().getPageSize();
+    const size_t headTreeSize = nodeSize;
+    const size_t lvlRatio = 10;
+    const size_t numColumns = columns.size();
+    const size_t numEntries = ((headTreeSize / keySize) - 1) * std::pow(lvlRatio, 4);
+
+    CFDTree* cfd = new CFDTree(ssd, columns, nodeSize, headTreeSize, lvlRatio);
+    DBIndexColumn* index = cfd;
+
+    EXPECT_EQ(index->getNumEntries(), 0);
+    EXPECT_EQ(index->getKeySize(), keySize);
+    EXPECT_EQ(index->getDataSize(), dataSize);
+    EXPECT_EQ(index->getRecordSize(), recordSize);
+    EXPECT_EQ(index->isBulkloadSupported(), false);
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getNumEntries(), numEntries);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    size_t expectedHeight = 4;
+    EXPECT_EQ(cfd->getHeight(), expectedHeight);
+
+    const size_t entriesPerLvl[] = {240, 9216, 82944, 1013760, 9123840};
+    ASSERT_EQ(std::accumulate(entriesPerLvl, entriesPerLvl + expectedHeight + 1, 0), numEntries);
+
+    for (size_t i = 0; i < expectedHeight + 1; ++i)
+        for (size_t j = 0; j < numColumns; ++j)
+        {
+            EXPECT_EQ(cfd->getCFDLvl(i, j).getNumEntries(), entriesPerLvl[i]);
+            EXPECT_LT(cfd->getCFDLvl(i, j).getNumEntries() + cfd->getCFDLvl(i, j).getNumEntriesToDelete(), cfd->getCFDLvl(i, j).getMaxEntries());
+            EXPECT_EQ(cfd->getCFDLvl(i, j).getLvl(), i);
+            EXPECT_EQ(cfd->getCFDLvl(i, j).getNumEntriesToDelete(), 0);
+            EXPECT_EQ(cfd->getCFDLvl(i, j).getMaxEntries(), (headTreeSize * static_cast<size_t>(std::floor(std::pow(lvlRatio, i)))) / keySize);
+        }
+
+
+    delete index;
+}
+
 GTEST_TEST(cfdtreeBasicTest, insertIntoHeadTree)
 {
     Disk* ssd = new DiskSSD_Samsung840();

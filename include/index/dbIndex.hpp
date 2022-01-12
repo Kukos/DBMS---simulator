@@ -263,6 +263,16 @@ public:
      */
     virtual double findRangeEntries(double selectivity, size_t numOperations = 1) noexcept(true) = 0;
 
+    /**
+     * @brief Fake the insert of numEntries entries to create a topology in fastest way.
+     *        This should be used only to test non-empty index in workloads, so this is a total fakeout.
+     *        No low-level simulation is done here. We are simulating only insert index code without involving disk simulator.
+     *        Counters wouldnt be pegged
+     *
+     * @param[in] numEntries - how entries to insert to create a topology
+     */
+    virtual void createTopologyAfterInsert(size_t numEntries = 1) noexcept(true) = 0;
+
     virtual ~DBIndex() = default;
     DBIndex() = default;
 

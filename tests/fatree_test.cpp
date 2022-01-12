@@ -64,6 +64,45 @@ GTEST_TEST(fatreeBasicFlashFTLTest, interface)
     delete index;
 }
 
+GTEST_TEST(fatreeBasicFlashFTLTest, topology)
+{
+    Disk* flash = new DiskFlashNandFTL_MicronMT29F32G08ABAAA();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t recordSize = keySize + dataSize;
+    const size_t nodeSize = flash->getLowLevelController().getPageSize();
+    const size_t headTreeSize = nodeSize;
+    const size_t lvlRatio = 2;
+    const size_t numEntries = ((headTreeSize / recordSize) - 1) * std::pow(lvlRatio, 10);
+
+    FATree* fa = new FATree(flash, keySize, dataSize, nodeSize, headTreeSize, lvlRatio);
+    DBIndex* index = fa;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getNumEntries(), numEntries);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(fa->getHeight(), 9);
+
+    const size_t entriesPerLvl[] = {106, 226, 452, 904, 904, 3616, 7232, 14464, 28928, 57856};
+    ASSERT_EQ(std::accumulate(entriesPerLvl, entriesPerLvl + 10, 0), numEntries);
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+        EXPECT_EQ(fa->getFALvl(i).getNumEntries(), entriesPerLvl[i]);
+        EXPECT_LT(fa->getFALvl(i).getNumEntries() + fa->getFALvl(i).getNumEntriesToDelete(), fa->getFALvl(i).getMaxEntries());
+        EXPECT_EQ(fa->getFALvl(i).getLvl(), i);
+        EXPECT_EQ(fa->getFALvl(i).getNumEntriesToDelete(), 0);
+        EXPECT_EQ(fa->getFALvl(i).getMaxEntries(), (headTreeSize * static_cast<size_t>(std::floor(std::pow(lvlRatio, i)))) / recordSize);
+    }
+
+    delete index;
+}
+
+
 GTEST_TEST(fatreeBasicFlashFTLTest, insertIntoHeadTree)
 {
     Disk* flash = new DiskFlashNandFTL_MicronMT29F32G08ABAAA();
@@ -1282,6 +1321,44 @@ GTEST_TEST(fatreeBasicFlashRawTest, insertIntoHeadTree)
         EXPECT_EQ(fa->getFALvl(0).getNumEntriesToDelete(), 0);
         EXPECT_EQ(fa->getFALvl(0).getLvl(), 0);
         EXPECT_EQ(fa->getFALvl(0).getMaxEntries(), headTreeSize / recordSize);
+    }
+
+    delete index;
+}
+
+GTEST_TEST(fatreeBasicFlashRawTest, topology)
+{
+    Disk* flash = new DiskFlashNandRaw_MicronMT29F32G08ABAAA();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t recordSize = keySize + dataSize;
+    const size_t nodeSize = flash->getLowLevelController().getPageSize();
+    const size_t headTreeSize = nodeSize;
+    const size_t lvlRatio = 2;
+    const size_t numEntries = ((headTreeSize / recordSize) - 1) * std::pow(lvlRatio, 10);
+
+    FATree* fa = new FATree(flash, keySize, dataSize, nodeSize, headTreeSize, lvlRatio);
+    DBIndex* index = fa;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getNumEntries(), numEntries);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(fa->getHeight(), 9);
+
+    const size_t entriesPerLvl[] = {106, 226, 452, 904, 904, 3616, 7232, 14464, 28928, 57856};
+    ASSERT_EQ(std::accumulate(entriesPerLvl, entriesPerLvl + 10, 0), numEntries);
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+        EXPECT_EQ(fa->getFALvl(i).getNumEntries(), entriesPerLvl[i]);
+        EXPECT_LT(fa->getFALvl(i).getNumEntries() + fa->getFALvl(i).getNumEntriesToDelete(), fa->getFALvl(i).getMaxEntries());
+        EXPECT_EQ(fa->getFALvl(i).getLvl(), i);
+        EXPECT_EQ(fa->getFALvl(i).getNumEntriesToDelete(), 0);
+        EXPECT_EQ(fa->getFALvl(i).getMaxEntries(), (headTreeSize * static_cast<size_t>(std::floor(std::pow(lvlRatio, i)))) / recordSize);
     }
 
     delete index;

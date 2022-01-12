@@ -561,3 +561,16 @@ std::string BPTree::toStringFull(bool oneLine) const noexcept(true)
                            std::string("\t.counters = ") + counters.toStringFull() + std::string("\n") +
                            std::string("}"));
 }
+
+void BPTree::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    LOGGER_LOG_DEBUG("Creating a topology now entries={}, height = {}, inserting new {} entries, after we will have {} entries", this->numEntries, height, numEntries, this->numEntries + numEntries);
+
+    this->numEntries += numEntries;
+
+    if (height != calculateHeight())
+    {
+        height = calculateHeight();
+        LOGGER_LOG_DEBUG("Entries inserted by createTopology, now entries = {}, height changed to {}", numEntries, height);
+    }
+}

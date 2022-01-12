@@ -65,6 +65,48 @@ GTEST_TEST(falsmtreeBasicTest, interface)
     delete index;
 }
 
+GTEST_TEST(falsmtreeBasicTest, topology)
+{
+    Disk* ssd = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t recordSize = keySize + dataSize;
+    const size_t nodeSize = ssd->getLowLevelController().getPageSize() * 10;
+    const size_t headTreeSize = nodeSize;
+    const size_t lvlRatio = 5;
+    const size_t numOperations = ((headTreeSize / recordSize) - 1) * std::pow(lvlRatio, 5);
+
+    FALSMTree* falsm = new FALSMTree(ssd, keySize, dataSize, nodeSize, headTreeSize, lvlRatio);
+    DBIndex* index = falsm;
+
+    index->createTopologyAfterInsert(numOperations);
+
+    EXPECT_EQ(index->getNumEntries(), numOperations);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    const size_t expectedHeight = 5;
+    EXPECT_EQ(falsm->getHeight(), expectedHeight);
+
+    const size_t entriesPerLvl[] = {286, 2274, 22740, 113700, 568500, 2842500};
+    ASSERT_EQ(std::accumulate(entriesPerLvl, entriesPerLvl + expectedHeight + 1, 0), numOperations);
+
+    for (size_t i = 0; i <= expectedHeight; ++i)
+    {
+        EXPECT_EQ(falsm->getFALSMLvl(i).getNumEntries(), entriesPerLvl[i]);
+        EXPECT_LT(falsm->getFALSMLvl(i).getNumEntries() + falsm->getFALSMLvl(i).getNumEntriesToDelete(), falsm->getFALSMLvl(i).getMaxEntries());
+        EXPECT_EQ(falsm->getFALSMLvl(i).getLvl(), i);
+        EXPECT_EQ(falsm->getFALSMLvl(i).getNumEntriesToDelete(), 0);
+        EXPECT_EQ(falsm->getFALSMLvl(i).getMaxEntries(), (headTreeSize * static_cast<size_t>(std::floor(std::pow(lvlRatio, i)))) / recordSize);
+        EXPECT_EQ(falsm->getFALSMLvl(i).getNumOfNodes(), std::pow(lvlRatio, i));
+        EXPECT_EQ(falsm->getFALSMLvl(i).getNumOverFlowNodes(), 0);
+    }
+
+    delete index;
+}
+
+
 GTEST_TEST(falsmtreeBasicTest, insertIntoBufferTree)
 {
     Disk* ssd = new DiskSSD_Samsung840();

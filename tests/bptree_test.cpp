@@ -59,6 +59,28 @@ GTEST_TEST(bptreeBasicSSDTest, interface)
     delete index;
 }
 
+GTEST_TEST(bptreeBasicSSDTest, topology)
+{
+    Disk* disk = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t nodeSize = disk->getLowLevelController().getPageSize();
+    const size_t numEntries = 1000000000;
+
+    BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* index = bp;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 4);
+
+    delete index;
+}
+
 GTEST_TEST(bptreeBasicSSDTest, copy)
 {
     Disk* disk = new DiskSSD_Samsung840();
@@ -1008,6 +1030,29 @@ GTEST_TEST(bptreeBasicFlashFTLTest, interface)
     delete index;
 }
 
+GTEST_TEST(bptreeBasicFlashFTLTest, topology)
+{
+    Disk* disk = new DiskFlashNandFTL_MicronMT29F32G08ABAAA();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t nodeSize = disk->getLowLevelController().getPageSize();
+    const size_t numEntries = 1000000000;
+
+    BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* index = bp;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 4);
+
+    delete index;
+}
+
+
 GTEST_TEST(bptreeBasicFlashFTLTest, insertIntoRoot)
 {
     Disk* disk = new DiskFlashNandFTL_MicronMT29F32G08ABAAA();
@@ -1761,6 +1806,29 @@ GTEST_TEST(bptreeBasicFlashRawTest, interface)
     delete index;
 }
 
+GTEST_TEST(bptreeBasicFlashRawTest, topology)
+{
+    Disk* disk = new DiskFlashNandRaw_MicronMT29F32G08ABAAA();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t nodeSize = disk->getLowLevelController().getPageSize();
+    const size_t numEntries = 1000000000;
+
+    BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* index = bp;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 4);
+
+    delete index;
+}
+
+
 GTEST_TEST(bptreeBasicFlashRawTest, insertIntoRoot)
 {
     Disk* disk = new DiskFlashNandRaw_MicronMT29F32G08ABAAA();
@@ -2376,6 +2444,28 @@ GTEST_TEST(bptreeBasicPCMTest, interface)
 
     // specific for BP
     EXPECT_EQ(bp->getHeight(), 0);
+
+    delete index;
+}
+
+GTEST_TEST(bptreeBasicPCMTest, topology)
+{
+    Disk* disk = new DiskPCM_DefaultModel();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t nodeSize = disk->getLowLevelController().getPageSize() * 8;
+    const size_t numEntries = 1000000000;
+
+    BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
+    DBIndex* index = bp;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(bp->getHeight(), 7);
 
     delete index;
 }

@@ -63,6 +63,44 @@ GTEST_TEST(fdtreeBasicTest, interface)
     delete index;
 }
 
+GTEST_TEST(fdtreeBasicTest, topology)
+{
+    Disk* ssd = new DiskSSD_Samsung840();
+
+    const size_t keySize = 8;
+    const size_t dataSize = 64;
+    const size_t recordSize = keySize + dataSize;
+    const size_t nodeSize = ssd->getLowLevelController().getPageSize();
+    const size_t headTreeSize = nodeSize;
+    const size_t lvlRatio = 2;
+    const size_t numEntries = ((headTreeSize / recordSize) - 1) * std::pow(lvlRatio, 10);
+
+    FDTree* fd = new FDTree(ssd, keySize, dataSize, nodeSize, headTreeSize, lvlRatio);
+    DBIndex* index = fd;
+
+    index->createTopologyAfterInsert(numEntries);
+
+    EXPECT_EQ(index->getNumEntries(), numEntries);
+    EXPECT_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second, 0);
+    EXPECT_DOUBLE_EQ(index->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second, 0.0);
+
+    EXPECT_EQ(fd->getHeight(), 9);
+
+    const size_t entriesPerLvl[] = {106, 226, 452, 904, 904, 3616, 7232, 14464, 28928, 57856};
+    ASSERT_EQ(std::accumulate(entriesPerLvl, entriesPerLvl + 10, 0), numEntries);
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+        EXPECT_EQ(fd->getFDLvl(i).getNumEntries(), entriesPerLvl[i]);
+        EXPECT_LT(fd->getFDLvl(i).getNumEntries() + fd->getFDLvl(i).getNumEntriesToDelete(), fd->getFDLvl(i).getMaxEntries());
+        EXPECT_EQ(fd->getFDLvl(i).getLvl(), i);
+        EXPECT_EQ(fd->getFDLvl(i).getNumEntriesToDelete(), 0);
+        EXPECT_EQ(fd->getFDLvl(i).getMaxEntries(), (headTreeSize * static_cast<size_t>(std::floor(std::pow(lvlRatio, i)))) / recordSize);
+    }
+
+    delete index;
+}
+
 GTEST_TEST(fdtreeBasicTest, insertIntoHeadTree)
 {
     Disk* ssd = new DiskSSD_Samsung840();

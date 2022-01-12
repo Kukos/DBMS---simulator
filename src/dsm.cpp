@@ -254,3 +254,10 @@ double DSM::findRangeEntries(const std::vector<size_t>& columnsToFetch, double s
 
     return findRangeEntries(columnsToFetch, static_cast<size_t>(static_cast<double>(this->numEntries) * selectivity), numOperations);
 }
+
+void DSM::createTopologyAfterInsert(size_t numEntries) noexcept(true)
+{
+    LOGGER_LOG_DEBUG("Creating a topology now entries={}, inserting new {} entries, after we will have {} entries", this->numEntries, numEntries, this->numEntries + numEntries);
+
+    this->numEntries += numEntries;
+}
