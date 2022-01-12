@@ -631,10 +631,16 @@ double LSMTree::bulkloadEntriesHelperMaxCapacity(size_t numEntries) noexcept(tru
     return time;
 }
 
-LSMTree::LSMTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, enum BulkloadFeatureMode bulkloadMode)
-: DBIndex("LSMTree", disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, bufferTree{LSMLvl(bufferTreeSize, sizeKey + sizeData, -1, nodeSize)}, bulkloadMode{bulkloadMode}
+LSMTree::LSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, enum BulkloadFeatureMode bulkloadMode)
+: DBIndex(name, disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, bufferTree{LSMLvl(bufferTreeSize, sizeKey + sizeData, -1, nodeSize)}, bulkloadMode{bulkloadMode}
 {
     LOGGER_LOG_DEBUG("LSMTree created {}", toStringFull());
+}
+
+LSMTree::LSMTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, enum BulkloadFeatureMode bulkloadMode)
+: LSMTree("LSMTree", disk, sizeKey, sizeData, nodeSize, bufferTreeSize, lvlRatio, bulkloadMode)
+{
+
 }
 
 LSMTree::LSMTree(Disk* disk, size_t sizeKey, size_t sizeData, enum BulkloadFeatureMode bulkloadMode)
@@ -642,6 +648,13 @@ LSMTree::LSMTree(Disk* disk, size_t sizeKey, size_t sizeData, enum BulkloadFeatu
 {
 
 }
+
+LSMTree::LSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, enum BulkloadFeatureMode bulkloadMode)
+: LSMTree(name, disk, sizeKey, sizeData, 1UL << 21 /* 2MB is a default for LSMTree */, 1UL << 21, 5, bulkloadMode)
+{
+
+}
+
 
 std::string LSMTree::toString(bool oneLine) const noexcept(true)
 {

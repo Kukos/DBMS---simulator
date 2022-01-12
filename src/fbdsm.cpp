@@ -126,10 +126,17 @@ double FBDSM::findEntriesHelper(const std::vector<size_t>& columnsToFetch, size_
     return time;
 }
 
-FBDSM::FBDSM(Disk* disk, const std::vector<size_t>& columnsSize)
-: DBIndexColumn("FBDSM", disk, columnsSize), entriesInInsertBuffer{0}
+FBDSM::FBDSM(const char* name, Disk* disk, const std::vector<size_t>& columnsSize)
+: DBIndexColumn(name, disk, columnsSize), entriesInInsertBuffer{0}
 {
     LOGGER_LOG_DEBUG("FBDSM created {}", toStringFull());
+}
+
+
+FBDSM::FBDSM(Disk* disk, const std::vector<size_t>& columnsSize)
+: FBDSM("FBDSM", disk, columnsSize)
+{
+
 }
 
 size_t FBDSM::getNumEntries() const noexcept(true)

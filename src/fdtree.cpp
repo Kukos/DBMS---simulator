@@ -485,14 +485,26 @@ double FDTree::findEntriesHelper(size_t numEntries, size_t numOperations) noexce
     return time;
 }
 
+FDTree::FDTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
+: DBIndex(name, disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, headTree{FDLvl(headTreeSize, sizeKey + sizeData, -1)}
+{
+    LOGGER_LOG_DEBUG("FDTree created {}", toStringFull());
+}
+
 FDTree::FDTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
-: DBIndex("FDTree", disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, headTree{FDLvl(headTreeSize, sizeKey + sizeData, -1)}
+: FDTree("FDTree", disk, sizeKey, sizeData, nodeSize, headTreeSize, lvlRatio)
 {
     LOGGER_LOG_DEBUG("FDTree created {}", toStringFull());
 }
 
 FDTree::FDTree(Disk* disk, size_t sizeKey, size_t sizeData)
 : FDTree(disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), disk->getLowLevelController().getPageSize(), 10)
+{
+
+}
+
+FDTree::FDTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData)
+: FDTree(name, disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), disk->getLowLevelController().getPageSize(), 10)
 {
 
 }

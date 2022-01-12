@@ -596,10 +596,17 @@ double FALSMTree::bulkloadEntriesHelper(size_t numEntries) noexcept(true)
     return time;
 }
 
-FALSMTree::FALSMTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, size_t capRatio)
-: DBIndex("FALSMTree", disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, capRatio{capRatio}, bufferTree{FALSMLvl(bufferTreeSize, sizeKey + sizeData, -1, nodeSize)}
+
+FALSMTree::FALSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, size_t capRatio)
+: DBIndex(name, disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, capRatio{capRatio}, bufferTree{FALSMLvl(bufferTreeSize, sizeKey + sizeData, -1, nodeSize)}
 {
     LOGGER_LOG_DEBUG("FALSMTree created {}", toStringFull());
+}
+
+FALSMTree::FALSMTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, size_t capRatio)
+: FALSMTree("FALSMTree", disk, sizeKey, sizeData, nodeSize, bufferTreeSize, lvlRatio, capRatio)
+{
+
 }
 
 FALSMTree::FALSMTree(Disk* disk, size_t sizeKey, size_t sizeData)
@@ -607,6 +614,13 @@ FALSMTree::FALSMTree(Disk* disk, size_t sizeKey, size_t sizeData)
 {
 
 }
+
+FALSMTree::FALSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData)
+: FALSMTree(name, disk, sizeKey, sizeData, 1UL << 21 /* 2MB is a default for FALSMTree */, 1UL << 21, 5)
+{
+
+}
+
 
 std::string FALSMTree::toString(bool oneLine) const noexcept(true)
 {

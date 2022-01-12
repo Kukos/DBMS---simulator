@@ -30,6 +30,16 @@ public:
     PhantomIndex(Disk* disk, bool isSpecialBulkloadFeatureOn = false);
 
     /**
+     * @brief Create Phantom Index
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk -     pointer to disk
+     * @param[in] isSpecialBulkloadFeatureOn - when true enables bulkload on not empty tree, by default false
+     * @return  Phantom Index object
+     */
+    PhantomIndex(const char* name, Disk* disk, bool isSpecialBulkloadFeatureOn = false);
+
+    /**
      * @brief Created brief snapshot of DBIndex as a string
      *
      * @param[in] oneLine - create string as 1 line or not? By default Yes

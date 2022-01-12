@@ -3,8 +3,8 @@
 
 #include <numeric>
 
-CFDTree::CFDTree(Disk* disk, const std::vector<size_t>& columnsSize, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
-: DBIndexColumn("CFDTree", disk, columnsSize), disk{std::unique_ptr<DiskColumnOverlay>(new DiskColumnOverlay(disk))}, nodeSize{nodeSize}, headTreeSize{headTreeSize}, lvlRatio{lvlRatio}
+CFDTree::CFDTree(const char* name, Disk* disk, const std::vector<size_t>& columnsSize, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
+: DBIndexColumn(name, disk, columnsSize), disk{std::unique_ptr<DiskColumnOverlay>(new DiskColumnOverlay(disk))}, nodeSize{nodeSize}, headTreeSize{headTreeSize}, lvlRatio{lvlRatio}
 {
     const size_t maxEntries = nodeSize / columnsSize[0];
     const size_t headTreeMultipler = headTreeSize / nodeSize;
@@ -19,14 +19,27 @@ CFDTree::CFDTree(Disk* disk, const std::vector<size_t>& columnsSize, size_t node
     LOGGER_LOG_DEBUG("CFDTree created {}", toStringFull());
 }
 
+
+CFDTree::CFDTree(Disk* disk, const std::vector<size_t>& columnsSize, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
+: CFDTree("CFDTree", disk, columnsSize, nodeSize, headTreeSize, lvlRatio)
+{
+
+}
+
 CFDTree::CFDTree(Disk* disk, const std::vector<size_t>& columnsSize)
 : CFDTree(disk, columnsSize, disk->getLowLevelController().getPageSize(), disk->getLowLevelController().getPageSize(), 10)
 {
 
 }
 
+CFDTree::CFDTree(const char* name, Disk* disk, const std::vector<size_t>& columnsSize)
+: CFDTree(name, disk, columnsSize, disk->getLowLevelController().getPageSize(), disk->getLowLevelController().getPageSize(), 10)
+{
+
+}
+
 CFDTree::CFDTree(const CFDTree& other)
-: CFDTree((*other.disk).clone(), other.columnsSize, other.nodeSize, other.headTreeSize, other.lvlRatio)
+: CFDTree(other.name, (*other.disk).clone(), other.columnsSize, other.nodeSize, other.headTreeSize, other.lvlRatio)
 {
 
 }

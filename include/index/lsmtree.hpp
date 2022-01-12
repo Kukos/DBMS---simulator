@@ -141,6 +141,23 @@ public:
     /**
      * @brief Create LSMTree
      *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] sizeKey - key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     * @param[in] nodeSize - node is a virtual contiguous area,
+     *                       called SSTable. Each Entry in SpareIndex has range of 1 SSTable
+     * @param[in] bufferTreeSize - size of buffered tree
+     * @param[in] lvlRatio - nextLvl.size = lvl.size * lvlRatio, lvl0.size = bufferTree.size * lvlRatio
+     * @param[in] bulkloadMode - bulkload mode (off, on with current capacity algo, on with max capacity algo)
+     *
+     * @return LSMTree object
+     */
+    LSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, enum BulkloadFeatureMode bulkloadMode = BULKLOAD_FEATURE_OFF);
+
+    /**
+     * @brief Create LSMTree
+     *
      * @param[in] disk - pointer to disk
      * @param[in] sizeKey - key size in bytes
      * @param[in] sizeData - data size (without key) in bytes
@@ -149,6 +166,19 @@ public:
      * @return LSMTree object
      */
     LSMTree(Disk* disk, size_t sizeKey, size_t sizeData, enum BulkloadFeatureMode bulkloadMode = BULKLOAD_FEATURE_OFF);
+
+    /**
+     * @brief Create LSMTree
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] sizeKey - key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     * @param[in] bulkloadMode - bulkload mode (off, on with current capacity algo, on with max capacity algo)
+     *
+     * @return LSMTree object
+     */
+    LSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, enum BulkloadFeatureMode bulkloadMode = BULKLOAD_FEATURE_OFF);
 
     /**
      * @brief Created brief snapshot of DBIndex as a string

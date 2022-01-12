@@ -1,10 +1,16 @@
 #include <index/phantomIndex.hpp>
 
-
-PhantomIndex::PhantomIndex(Disk* disk, bool isSpecialBulkloadFeatureOn)
-: DBIndex("PhantomIndex", disk, 0, 0), isSpecialBulkloadFeatureOn{isSpecialBulkloadFeatureOn}
+PhantomIndex::PhantomIndex(const char* name, Disk* disk, bool isSpecialBulkloadFeatureOn)
+: DBIndex(name, disk, 0, 0), isSpecialBulkloadFeatureOn{isSpecialBulkloadFeatureOn}
 {
     LOGGER_LOG_DEBUG("PhantomIndex created {}", toStringFull());
+}
+
+
+PhantomIndex::PhantomIndex(Disk* disk, bool isSpecialBulkloadFeatureOn)
+: PhantomIndex("PhantomIndex", disk, isSpecialBulkloadFeatureOn)
+{
+
 }
 
 std::string PhantomIndex::toString(bool oneLine) const noexcept(true)

@@ -441,14 +441,26 @@ double CBPTree::findEntriesHelper(size_t numEntries, size_t numOperations) noexc
     return time;
 }
 
-CBPTree::CBPTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn)
-: DBIndex("CB+Tree", disk, sizeKey, sizeData), nodeSize{nodeSize}, sizePtr{sizeKey + sizeof(void*)}, height{0}, isSpecialBulkloadFeatureOn{isSpecialBulkloadFeatureOn}, insertOFBufferLeaf{0}, insertOFBufferInner{0}, deleteOFBufferLeaf{0}, deleteOFBufferInner{0}
+CBPTree::CBPTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn)
+: DBIndex(name, disk, sizeKey, sizeData), nodeSize{nodeSize}, sizePtr{sizeKey + sizeof(void*)}, height{0}, isSpecialBulkloadFeatureOn{isSpecialBulkloadFeatureOn}, insertOFBufferLeaf{0}, insertOFBufferInner{0}, deleteOFBufferLeaf{0}, deleteOFBufferInner{0}
 {
     LOGGER_LOG_DEBUG("CBPTree created {}", toStringFull());
 }
 
+CBPTree::CBPTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn)
+: CBPTree("CB+Tree", disk, sizeKey, sizeData, nodeSize, isSpecialBulkloadFeatureOn)
+{
+
+}
+
 CBPTree::CBPTree(Disk* disk, size_t sizeKey, size_t sizeData, bool isSpecialBulkloadFeatureOn)
 : CBPTree(disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), isSpecialBulkloadFeatureOn)
+{
+
+}
+
+CBPTree::CBPTree(const char*name, Disk* disk, size_t sizeKey, size_t sizeData, bool isSpecialBulkloadFeatureOn)
+: CBPTree(name, disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), isSpecialBulkloadFeatureOn)
 {
 
 }

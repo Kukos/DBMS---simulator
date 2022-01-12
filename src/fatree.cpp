@@ -485,14 +485,27 @@ double FATree::findEntriesHelper(size_t numEntries, size_t numOperations) noexce
     return time;
 }
 
-FATree::FATree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
-: DBIndex("FATree", disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, headTree{FALvl(headTreeSize, sizeKey + sizeData, -1)}
+FATree::FATree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
+: DBIndex(name, disk, sizeKey, sizeData), nodeSize{nodeSize}, lvlRatio{lvlRatio}, headTree{FALvl(headTreeSize, sizeKey + sizeData, -1)}
 {
     LOGGER_LOG_DEBUG("FATree created {}", toStringFull());
 }
 
+
+FATree::FATree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t headTreeSize, size_t lvlRatio)
+: FATree("FATree", disk, sizeKey, sizeData, nodeSize, headTreeSize, lvlRatio)
+{
+
+}
+
 FATree::FATree(Disk* disk, size_t sizeKey, size_t sizeData)
 : FATree(disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), disk->getLowLevelController().getPageSize(), 10)
+{
+
+}
+
+FATree::FATree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData)
+: FATree(name, disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), disk->getLowLevelController().getPageSize(), 10)
 {
 
 }

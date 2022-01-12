@@ -398,14 +398,27 @@ double BPTree::findEntriesHelper(size_t numEntries, size_t numOperations) noexce
     return time;
 }
 
-BPTree::BPTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn)
-: DBIndex("B+Tree", disk, sizeKey, sizeData), nodeSize{nodeSize}, sizePtr{sizeKey + sizeof(void*)}, height{0}, isSpecialBulkloadFeatureOn{isSpecialBulkloadFeatureOn}
+BPTree::BPTree(const char*name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn)
+: DBIndex(name, disk, sizeKey, sizeData), nodeSize{nodeSize}, sizePtr{sizeKey + sizeof(void*)}, height{0}, isSpecialBulkloadFeatureOn{isSpecialBulkloadFeatureOn}
 {
     LOGGER_LOG_DEBUG("BPTree created {}", toStringFull());
 }
 
+
+BPTree::BPTree(Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn)
+: BPTree("B+Tree", disk, sizeKey, sizeData, nodeSize, isSpecialBulkloadFeatureOn)
+{
+
+}
+
 BPTree::BPTree(Disk* disk, size_t sizeKey, size_t sizeData, bool isSpecialBulkloadFeatureOn)
 : BPTree(disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), isSpecialBulkloadFeatureOn)
+{
+
+}
+
+BPTree::BPTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, bool isSpecialBulkloadFeatureOn)
+: BPTree(name, disk, sizeKey, sizeData, disk->getLowLevelController().getPageSize(), isSpecialBulkloadFeatureOn)
 {
 
 }

@@ -138,6 +138,23 @@ public:
     /**
      * @brief Create FALSMTree
      *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] sizeKey - key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     * @param[in] nodeSize - node is a virtual contiguous area,
+     *                       called SSTable. Each Entry in SpareIndex has range of 1 SSTable
+     * @param[in] bufferTreeSize - size of buffered tree
+     * @param[in] lvlRatio - nextLvl.size = lvl.size * lvlRatio, lvl0.size = bufferTree.size * lvlRatio
+     * @param[in] capRatio - in bulkload we have decition: if (newEnties < lvl.maxEntries / capRatio)
+     *
+     * @return FALSMTree object
+     */
+    FALSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t bufferTreeSize, size_t lvlRatio, size_t capRatio = 1);
+
+    /**
+     * @brief Create FALSMTree
+     *
      * @param[in] disk - pointer to disk
      * @param[in] sizeKey - key size in bytes
      * @param[in] sizeData - data size (without key) in bytes
@@ -145,6 +162,18 @@ public:
      * @return FALSMTree object
      */
     FALSMTree(Disk* disk, size_t sizeKey, size_t sizeData);
+
+    /**
+     * @brief Create FALSMTree
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] sizeKey - key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     *
+     * @return FALSMTree object
+     */
+    FALSMTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData);
 
     /**
      * @brief Created brief snapshot of DBIndex as a string

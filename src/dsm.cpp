@@ -108,10 +108,16 @@ double DSM::findEntriesHelper(const std::vector<size_t>& columnsToFetch, size_t 
     return time;
 }
 
-DSM::DSM(Disk* disk, const std::vector<size_t>& columnsSize)
-: DBIndexColumn("DSM", disk, columnsSize)
+DSM::DSM(const char* name, Disk* disk, const std::vector<size_t>& columnsSize)
+: DBIndexColumn(name, disk, columnsSize)
 {
     LOGGER_LOG_DEBUG("DSM created {}", toStringFull());
+}
+
+DSM::DSM(Disk* disk, const std::vector<size_t>& columnsSize)
+: DSM("DSM", disk, columnsSize)
+{
+
 }
 
 std::string DSM::toString(bool oneLine) const noexcept(true)

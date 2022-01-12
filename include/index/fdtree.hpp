@@ -122,6 +122,22 @@ public:
     /**
      * @brief Create FDTree
      *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] sizeKey - key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     * @param[in] nodeSize - node is a virtual contiguous area,
+     *                       each node has a pointer into him in a lvl upper
+     * @param[in] headTreeSize - size of buffered head tree
+     * @param[in] lvlRatio - nextLvl.size = lvl.size * lvlRatio, lvl0.size = headTree.size * lvlRatio
+     *
+     * @return FDTree object
+     */
+    FDTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, size_t headTreeSize, size_t lvlRatio);
+
+    /**
+     * @brief Create FDTree
+     *
      * @param[in] disk - pointer to disk
      * @param[in] sizeKey - key size in bytes
      * @param[in] sizeData - data size (without key) in bytes
@@ -129,6 +145,19 @@ public:
      * @return FDTree object
      */
     FDTree(Disk* disk, size_t sizeKey, size_t sizeData);
+
+    /**
+     * @brief Create FDTree
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] sizeKey - key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     *
+     * @return FDTree object
+     */
+    FDTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData);
+
 
     /**
      * @brief Created brief snapshot of DBIndex as a string

@@ -36,12 +36,39 @@ public:
     /**
      * @brief Create CFDTree
      *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] columnsSize - vector with size of each columns [0] - key
+     * @param[in] nodeSize - node is a virtual contiguous area,
+     *                       each node has a pointer into him in a lvl upper
+     * @param[in] headTreeSize - size of buffered head tree
+     * @param[in] lvlRatio - nextLvl.size = lvl.size * lvlRatio, lvl0.size = headTree.size * lvlRatio
+     *
+     * @return CFDTree object
+     */
+    CFDTree(const char* name, Disk* disk, const std::vector<size_t>& columnsSize, size_t nodeSize, size_t headTreeSize, size_t lvlRatio);
+
+
+    /**
+     * @brief Create CFDTree
+     *
      * @param[in] disk - pointer to disk
      * @param[in] columnsSize - vector with size of each columns [0] - key
      *
      * @return CFDTree object
      */
     CFDTree(Disk* disk, const std::vector<size_t>& columnsSize);
+
+    /**
+     * @brief Create CFDTree
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] columnsSize - vector with size of each columns [0] - key
+     *
+     * @return CFDTree object
+     */
+    CFDTree(const char* name, Disk* disk, const std::vector<size_t>& columnsSize);
 
     /**
     * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndexColumn

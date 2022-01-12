@@ -53,6 +53,20 @@ public:
     /**
      * @brief Create UBPTree
      *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk -     pointer to disk
+     * @param[in] sizeKey -  key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     * @param[in] nodeSize - node is a virtual contiguous area,
+     *                       each node has a pointer into him in a lvl upper
+     * @param[in] isSpecialBulkloadFeatureOn - when true enables bulkload on not empty tree, by default false
+     * @return BPTree object
+     */
+    UBPTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, size_t nodeSize, bool isSpecialBulkloadFeatureOn = false);
+
+    /**
+     * @brief Create UBPTree
+     *
      * @param[in] disk -     pointer to disk
      * @param[in] sizeKey -  key size in bytes
      * @param[in] sizeData - data size (without key) in bytes
@@ -61,6 +75,19 @@ public:
      * @return UBPTree object
      */
     UBPTree(Disk* disk, size_t sizeKey, size_t sizeData, bool isSpecialBulkloadFeatureOn = false);
+
+    /**
+     * @brief Create UBPTree
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk -     pointer to disk
+     * @param[in] sizeKey -  key size in bytes
+     * @param[in] sizeData - data size (without key) in bytes
+     * @param[in] isSpecialBulkloadFeatureOn - when true enables bulkload on not empty tree, by default false
+     *
+     * @return UBPTree object
+     */
+    UBPTree(const char* name, Disk* disk, size_t sizeKey, size_t sizeData, bool isSpecialBulkloadFeatureOn = false);
 
     /**
      * @brief Created brief snapshot of DBIndex as a string

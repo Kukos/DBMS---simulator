@@ -26,6 +26,17 @@ public:
     FBDSM(Disk* disk, const std::vector<size_t>& columnsSize);
 
     /**
+     * @brief Create DSM
+     *
+     * @param[in] name -     dbIndex name
+     * @param[in] disk - pointer to disk
+     * @param[in] columnsSize - vector with size of each columns [0] - key
+     *
+     * @return DSM object
+     */
+    FBDSM(const char* name, Disk* disk, const std::vector<size_t>& columnsSize);
+
+    /**
     * @brief Virtual constructor idiom implemented as clone function. This function creates new DBIndexColumn
     *
     * @return new DBIndexColumn
