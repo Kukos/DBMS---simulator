@@ -35,7 +35,14 @@ public:
 
         INDEX_COUNTER_RO_TOTAL_TIME,
 
-        INDEX_COUNTER_D_MAX_ITERATOR // to iterate over enum
+        INDEX_COUNTER_D_MAX_ITERATOR, // to iterate over enum
+
+        // AM counters only as a fakeout (read by function not internally)
+        INDEX_AM_COUNTER_RO_INVALIDATION_TOTAL_TIME,
+        INDEX_AM_COUNTER_RO_LOADING_TOTAL_TIME,
+        INDEX_AM_COUNTER_RO_INVALIDATION_AVG_TIME,
+        INDEX_AM_COUNTER_RO_LOADING_AVG_TIME,
+        INDEX_AM_COUNTER_RO_TOTAL_TIME,
     };
 
     /**
@@ -61,7 +68,12 @@ public:
         //////// READ ONLY COUNTERS, BASED ON RW COUNTERS ////////
         INDEX_COUNTER_RO_TOTAL_OPERATIONS,
 
-        INDEX_COUNTER_L_MAX_ITERATOR // to iterate over enum
+        INDEX_COUNTER_L_MAX_ITERATOR, // to iterate over enum
+
+        // AM counters only as a fakeout (read by function not internally)
+        INDEX_AM_COUNTER_RO_INVALIDATION_TOTAL_OPERATIONS,
+        INDEX_AM_COUNTER_RO_LOADING_TOTAL_OPERATIONS,
+        INDEX_AM_COUNTER_RO_TOTAL_OPERATIONS,
     };
 
 private:

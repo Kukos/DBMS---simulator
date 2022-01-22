@@ -43,13 +43,13 @@ IndexCounters::IndexCounters()
     countersDouble.addCounter(INDEX_COUNTER_RO_RSEARCH_AVG_TIME, std::string(TO_STRING(INDEX_COUNTER_RO_RSEARCH_AVG_TIME)));
     countersDouble.addCounter(INDEX_COUNTER_RO_TOTAL_TIME, std::string(TO_STRING(INDEX_COUNTER_RO_TOTAL_TIME)));
 
-
     // add long counters
     countersLong.addCounter(INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS, std::string(TO_STRING(INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS)));
     countersLong.addCounter(INDEX_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS, std::string(TO_STRING(INDEX_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS)));
     countersLong.addCounter(INDEX_COUNTER_RW_DELETE_TOTAL_OPERATIONS, std::string(TO_STRING(INDEX_COUNTER_RW_DELETE_TOTAL_OPERATIONS)));
     countersLong.addCounter(INDEX_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS, std::string(TO_STRING(INDEX_COUNTER_RW_PSEARCH_TOTAL_OPERATIONS)));
     countersLong.addCounter(INDEX_COUNTER_RW_RSEARCH_TOTAL_OPERATIONS, std::string(TO_STRING(INDEX_COUNTER_RW_RSEARCH_TOTAL_OPERATIONS)));
+
     // add RO counters to get name is easy way
     countersLong.addCounter(INDEX_COUNTER_RO_TOTAL_OPERATIONS, std::string(TO_STRING(INDEX_COUNTER_RO_TOTAL_OPERATIONS)));
 
@@ -67,6 +67,10 @@ void IndexCounters::pegCounter(enum IndexCountersD counterId, double val) noexce
 
 void IndexCounters::resetCounter(enum IndexCountersD counterId) noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_D_MAX_ITERATOR)
+        return;
+
     // RO counters are always at the end
     if (counterId >= INDEX_COUNTER_RO_INSERT_AVG_TIME)
         return; // cannot reset RO counter
@@ -76,6 +80,10 @@ void IndexCounters::resetCounter(enum IndexCountersD counterId) noexcept(true)
 
 void IndexCounters::pegCounter(enum IndexCountersL counterId, long val) noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_L_MAX_ITERATOR)
+        return;
+
     // RO counters are always at the end
     if (counterId >= INDEX_COUNTER_RO_TOTAL_OPERATIONS)
         return; // cannot peg RO counter
@@ -85,6 +93,10 @@ void IndexCounters::pegCounter(enum IndexCountersL counterId, long val) noexcept
 
 void IndexCounters::resetCounter(enum IndexCountersL counterId) noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_L_MAX_ITERATOR)
+        return;
+
     // RO counters are always at the end
     if (counterId >= INDEX_COUNTER_RO_TOTAL_OPERATIONS)
         return; // cannot reset RO counter
@@ -94,6 +106,10 @@ void IndexCounters::resetCounter(enum IndexCountersL counterId) noexcept(true)
 
 double IndexCounters::getCounterValue(enum IndexCountersD counterId) const noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_D_MAX_ITERATOR)
+        return 0.0;
+
     // rw counter
     if (counterId < INDEX_COUNTER_RO_INSERT_AVG_TIME)
         return countersDouble.getCounterValue(counterId);
@@ -147,6 +163,10 @@ double IndexCounters::getCounterValue(enum IndexCountersD counterId) const noexc
 
 long IndexCounters::getCounterValue(enum IndexCountersL counterId) const noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_L_MAX_ITERATOR)
+        return 0.0;
+
     // rw counter
     if (counterId < INDEX_COUNTER_RO_TOTAL_OPERATIONS)
         return countersLong.getCounterValue(counterId);
@@ -175,11 +195,19 @@ long IndexCounters::getCounterValue(enum IndexCountersL counterId) const noexcep
 
 std::string IndexCounters::getCounterName(enum IndexCountersD counterId) const noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_D_MAX_ITERATOR)
+        return std::string("AM_COUNTER");
+
     return countersDouble.getCounterName(counterId);
 }
 
 std::string IndexCounters::getCounterName(enum IndexCountersL counterId) const noexcept(true)
 {
+    // AM fake counters
+    if (counterId >= INDEX_COUNTER_L_MAX_ITERATOR)
+        return std::string("AM_COUNTER");
+
     return countersLong.getCounterName(counterId);
 }
 

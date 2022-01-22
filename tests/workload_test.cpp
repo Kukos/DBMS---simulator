@@ -70,6 +70,11 @@ GTEST_TEST(workloadTestRaw, interface)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -80,6 +85,11 @@ GTEST_TEST(workloadTestRaw, interface)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -388,6 +398,11 @@ GTEST_TEST(workloadTestRaw, multiSteps)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -398,6 +413,11 @@ GTEST_TEST(workloadTestRaw, multiSteps)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -518,6 +538,11 @@ GTEST_TEST(workloadTestRaw, copy)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -528,6 +553,11 @@ GTEST_TEST(workloadTestRaw, copy)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -612,6 +642,11 @@ GTEST_TEST(workloadTestRaw, copy)
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -630,6 +665,11 @@ GTEST_TEST(workloadTestRaw, copy)
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0);
                 EXPECT_NE(copy.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
+            {
+                EXPECT_EQ(copy.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy.getTotalCounters(i).getCounter(id).second, 0L);
             }
             else if (id == WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS)
             {
@@ -707,6 +747,11 @@ GTEST_TEST(workloadTestRaw, copy)
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -717,6 +762,11 @@ GTEST_TEST(workloadTestRaw, copy)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
@@ -837,6 +887,11 @@ GTEST_TEST(workloadTestRaw, move)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -847,6 +902,11 @@ GTEST_TEST(workloadTestRaw, move)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -931,6 +991,11 @@ GTEST_TEST(workloadTestRaw, move)
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -949,6 +1014,11 @@ GTEST_TEST(workloadTestRaw, move)
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0);
                 EXPECT_NE(copy.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
+            {
+                EXPECT_EQ(copy.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy.getTotalCounters(i).getCounter(id).second, 0L);
             }
             else if (id == WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS)
             {
@@ -1026,6 +1096,11 @@ GTEST_TEST(workloadTestRaw, move)
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1036,6 +1111,11 @@ GTEST_TEST(workloadTestRaw, move)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
@@ -1169,6 +1249,11 @@ GTEST_TEST(workloadTestColumn, interface)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1183,6 +1268,11 @@ GTEST_TEST(workloadTestColumn, interface)
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0L);
@@ -1190,6 +1280,7 @@ GTEST_TEST(workloadTestColumn, interface)
             }
         }
     }
+
 
     EXPECT_DOUBLE_EQ(w.getStepCounters(0, 0).getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME), 0.0);
     EXPECT_DOUBLE_EQ(w.getStepCounters(0, 0).getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_TIME), w.getStepCounters(0, 0).getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME));
@@ -1484,6 +1575,11 @@ GTEST_TEST(workloadTestColumn, multiSteps)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1494,6 +1590,11 @@ GTEST_TEST(workloadTestColumn, multiSteps)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -1614,6 +1715,11 @@ GTEST_TEST(workloadTestColumn, copy)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1624,6 +1730,11 @@ GTEST_TEST(workloadTestColumn, copy)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -1708,6 +1819,11 @@ GTEST_TEST(workloadTestColumn, copy)
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1726,6 +1842,11 @@ GTEST_TEST(workloadTestColumn, copy)
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0);
                 EXPECT_NE(copy.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
+            {
+                EXPECT_EQ(copy.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy.getTotalCounters(i).getCounter(id).second, 0L);
             }
             else if (id == WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS)
             {
@@ -1803,6 +1924,11 @@ GTEST_TEST(workloadTestColumn, copy)
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1813,6 +1939,11 @@ GTEST_TEST(workloadTestColumn, copy)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
@@ -1933,6 +2064,11 @@ GTEST_TEST(workloadTestColumn, move)
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(w.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(w.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -1943,6 +2079,11 @@ GTEST_TEST(workloadTestColumn, move)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(w.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(w.getTotalCounters(i).getCounter(id).second, 0L);
@@ -2027,6 +2168,11 @@ GTEST_TEST(workloadTestColumn, move)
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -2045,6 +2191,11 @@ GTEST_TEST(workloadTestColumn, move)
             {
                 EXPECT_NE(copy.getTotalCounters(i).getCounterValue(id), 0);
                 EXPECT_NE(copy.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
+            {
+                EXPECT_EQ(copy.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy.getTotalCounters(i).getCounter(id).second, 0L);
             }
             else if (id == WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS)
             {
@@ -2122,6 +2273,11 @@ GTEST_TEST(workloadTestColumn, move)
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
                 EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
             }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME)
+            {
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
+                EXPECT_DOUBLE_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0.0);
+            }
             else
             {
                 EXPECT_NE(copy2.getTotalCounters(i).getCounterValue(id), 0.0);
@@ -2132,6 +2288,11 @@ GTEST_TEST(workloadTestColumn, move)
         for (auto id = WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS; id < WorkloadCounters::WORKLOAD_COUNTER_L_MAX_ITERATOR; ++id)
         {
             if (i == 0 && (id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT || id == WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT))
+            {
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
+                EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);
+            }
+            else if (id >= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS && id <= WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS)
             {
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounterValue(id), 0L);
                 EXPECT_EQ(copy2.getTotalCounters(i).getCounter(id).second, 0L);

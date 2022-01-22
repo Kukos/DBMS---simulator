@@ -21,6 +21,12 @@ WorkloadCounters WorkloadStep::collectCounters() noexcept(true)
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_RSEARCH_AVG_TIME, rIndex->getCounter(IndexCounters::INDEX_COUNTER_RO_RSEARCH_AVG_TIME).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME, rIndex->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second);
 
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_INVALIDATION_TOTAL_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_LOADING_TOTAL_TIME, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_LOADING_TOTAL_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_AVG_TIME, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_INVALIDATION_AVG_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_LOADING_AVG_TIME, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_LOADING_AVG_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_TOTAL_TIME).second);
+
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_DELETE_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_COUNTER_RW_DELETE_TOTAL_OPERATIONS).second);
@@ -29,6 +35,10 @@ WorkloadCounters WorkloadStep::collectCounters() noexcept(true)
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT, rIndex->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second + rIndex->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT, rIndex->getDisk().getLowLevelController().getMemoryModel().getMemoryWearOut());
+
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_INVALIDATION_TOTAL_OPERATIONS).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_LOADING_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_LOADING_TOTAL_OPERATIONS).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS, rIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_TOTAL_OPERATIONS).second);
     }
     else
     {
@@ -44,6 +54,12 @@ WorkloadCounters WorkloadStep::collectCounters() noexcept(true)
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_RSEARCH_AVG_TIME, cIndex->getCounter(IndexCounters::INDEX_COUNTER_RO_RSEARCH_AVG_TIME).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME, cIndex->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_TIME).second);
 
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_TIME, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_INVALIDATION_TOTAL_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_LOADING_TOTAL_TIME, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_LOADING_TOTAL_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_AVG_TIME, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_INVALIDATION_AVG_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_LOADING_AVG_TIME, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_LOADING_AVG_TIME).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_TIME, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_TOTAL_TIME).second);
+
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_INSERT_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_COUNTER_RW_INSERT_TOTAL_OPERATIONS).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_COUNTER_RW_BULKLOAD_TOTAL_OPERATIONS).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_DELETE_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_COUNTER_RW_DELETE_TOTAL_OPERATIONS).second);
@@ -52,6 +68,10 @@ WorkloadCounters WorkloadStep::collectCounters() noexcept(true)
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_COUNTER_RO_TOTAL_OPERATIONS).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_VIRTUAL_WEAROUT, cIndex->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_BYTES).second + cIndex->getDisk().getDiskCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES).second);
         tempCounters.pegCounter(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_PHYSICAL_WEAROUT, cIndex->getDisk().getLowLevelController().getMemoryModel().getMemoryWearOut());
+
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_INVALIDATION_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_INVALIDATION_TOTAL_OPERATIONS).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_LOADING_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_LOADING_TOTAL_OPERATIONS).second);
+        tempCounters.pegCounter(WorkloadCounters::WORKLOAD_AM_COUNTER_RW_TOTAL_OPERATIONS, cIndex->getCounter(IndexCounters::INDEX_AM_COUNTER_RO_TOTAL_OPERATIONS).second);
     }
     return tempCounters;
 }
