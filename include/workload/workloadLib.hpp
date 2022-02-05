@@ -10,6 +10,7 @@
 #include <workload/workloadStepRSearch.hpp>
 
 #include <workload/workload.hpp>
+#include <workload/workloadAdaptiveMerging.hpp>
 
 #include <workload/analyzer/analyzerStep.hpp>
 #include <workload/analyzer/analyzerStepTotalTime.hpp>
