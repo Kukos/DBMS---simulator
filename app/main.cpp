@@ -13,8 +13,8 @@ int main()
 
     std::cout << "Database Management System - simulator" << std::endl;
 
-    sandboxLSMPaper();
-    // experimentLSMPaper();
+    // sandboxLSMPaper();
+    experimentLSMPaper();
 
     DBThreadPool::threadPool.wait_for_tasks();
 

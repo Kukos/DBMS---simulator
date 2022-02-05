@@ -1585,6 +1585,578 @@
     LOGGER_LOG_INFO("{}: Bulkload databaseSizeTEST finished: {}", exName, label);
 }
 
+[[maybe_unused]] static void paper_bulkloadAndRSearchRandomSel(std::string exName, size_t startingEntriesInIndex, size_t entriesToInsert, size_t minRandom, size_t maxRandom, size_t rsearches, double sel, size_t ssTableSize, size_t bufferSize, size_t levelRatio)
+{
+    DBTable* table = new DBTable_TPCC_Warehouse();
+    Disk* disk = new DiskSSD_Samsung840();
+
+    std::vector<std::string> names {"1", "2", "3", "4", "5", "10", "15", "20", "25", "50", "LSM"};
+
+    DBIndex* falsm1 = new FALSMTree(names[0].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 1);
+    DBIndex* falsm2 = new FALSMTree(names[1].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 2);
+    DBIndex* falsm3 = new FALSMTree(names[2].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 3);
+    DBIndex* falsm4 = new FALSMTree(names[3].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 4);
+    DBIndex* falsm5 = new FALSMTree(names[4].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 5);
+    DBIndex* falsm10 = new FALSMTree(names[5].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 10);
+    DBIndex* falsm15 = new FALSMTree(names[6].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 15);
+    DBIndex* falsm20 = new FALSMTree(names[7].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 20);
+    DBIndex* falsm25 = new FALSMTree(names[8].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 25);
+    DBIndex* falsm50 = new FALSMTree(names[9].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 50);
+    DBIndex* lsmClassic = new LSMTree(names[10].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, LSMTree::BULKLOAD_FEATURE_OFF);
+
+    std::string label = std::string("Bulkload paper ") + exName + std::string(" :") +
+                        std::string(" startingEntriesInIndex = ") + std::to_string(startingEntriesInIndex) +
+                        std::string(" entriesToInsert = ") + std::to_string(entriesToInsert) +
+                        std::string(" bulkloadPackageNumEntries = [") + std::to_string(minRandom) + std::string(" - ") + std::to_string(maxRandom) + std::string("]") +
+                        std::string(" rsearches = ") + std::to_string(rsearches) +
+                        std::string(" sel = ") + std::to_string(sel) +
+                        std::string(" indexesParams = {") +
+                        std::string(" bufferSize = ") + std::to_string(bufferSize) +
+                        std::string(" ssTableSize = ") + std::to_string(ssTableSize) +
+                        std::string(" levelRatio = ") + std::to_string(levelRatio) + std::string(" }") +
+                        std::string(" table = ") + table->toString();
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload test started: {}", exName, label);
+
+    std::vector<DBIndex*> indexes {falsm1, falsm2, falsm3, falsm4, falsm5, falsm10, falsm15, falsm20, falsm25, falsm50, lsmClassic};
+    if (startingEntriesInIndex > 0)
+    {
+        for (size_t i = 0; i < indexes.size(); ++i)
+            indexes[i]->createTopologyAfterInsert(startingEntriesInIndex);
+
+        LOGGER_LOG_INFO("PAPER {}: Bulkload test Topology created with {} entries", exName, startingEntriesInIndex);
+    }
+
+    std::vector<WorkloadStep*> steps;
+
+    std::mt19937 rng(MY_LUCKY_SEED);
+    std::uniform_int_distribution<size_t> randomizer(minRandom, maxRandom);
+
+    size_t entriesLeft = entriesToInsert;
+    while (entriesLeft > 0)
+    {
+        size_t n = std::min(entriesLeft, randomizer(rng));
+        steps.push_back(new WorkloadStepBulkload(n));
+
+        entriesLeft -= n;
+
+        steps.push_back(new WorkloadStepRSearch(sel, rsearches));
+    }
+
+    Workload workload(indexes, steps);
+    workload.run();
+
+    for (size_t i = 0; i < indexes.size(); ++i)
+        if (indexes[i]->getNumEntries() != entriesToInsert + startingEntriesInIndex)
+            LOGGER_LOG_ERROR("PAPER {}: Index {}, numEntries = {} != entriesToInsert {}", exName, indexes[i]->getName(), indexes[i]->getNumEntries(), entriesToInsert);
+
+
+    std::string toPrint("");
+
+    toPrint += std::string("T\tBulk loading time\tSearch time\tTotal time\tLSM total time\n");
+
+    const std::vector<WorkloadCounters>& totalCounters = workload.getAllTotalCounters();
+    double lsmTotalTime = totalCounters[names.size() - 1].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME);
+    for (size_t i = 0; i < names.size() - 1; ++i) // last is lsmtree
+    {
+        toPrint += names[i]; // 1 or 2 or  .... this is T parameter
+
+        toPrint += std::string("\t") + std::to_string(totalCounters[i].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_TIME)) +
+                   std::string("\t") + std::to_string(totalCounters[i].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_RSEARCH_TOTAL_TIME)) +
+                   std::string("\t") + std::to_string(totalCounters[i].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME)) +
+                   std::string("\t") + std::to_string(lsmTotalTime) +
+                   std::string("\n");
+    }
+
+    DBThreadPool::mutex.lock();
+
+    std::ofstream outfile;
+    std::string path(LSM_REAL_EXPERIMENTS_DIRECTORY_PATH);
+    path += std::string("/") + exName + std::string(".txt");
+    outfile.open(path);
+
+    outfile << toPrint << std::flush;
+
+    DBThreadPool::mutex.unlock();
+
+    delete disk;
+    delete table;
+
+    for (size_t i = 0; i < indexes.size(); ++i)
+        delete indexes[i];
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload test finished: {}", exName, label);
+}
+
+
+[[maybe_unused]] static void paper_bulkloadAndRSearchSelPackageSize(std::string exName, std::vector<std::string> labels, std::vector<size_t>packageSize, size_t startingEntriesInIndex, size_t entriesToInsert, size_t rsearches, double sel, size_t ssTableSize, size_t bufferSize, size_t levelRatio)
+{
+    if (labels.size() != packageSize.size())
+    {
+        LOGGER_LOG_ERROR("PAPER {} labels.size() {} != packageSize.size() {}", exName, labels.size(), packageSize.size());
+        return;
+    }
+
+    DBTable* table = new DBTable_TPCC_Warehouse();
+
+    auto buildStringFromVector = [](const std::string &accumulator, const size_t& size)
+    {
+        return accumulator.empty() ? std::to_string(size) : accumulator + ", " + std::to_string(size);
+    };
+
+    const std::string bulkloadPackageSizeString =  std::string("{") + std::accumulate(std::begin(packageSize), std::end(packageSize), std::string(), buildStringFromVector) + std::string("}");
+
+
+    std::string label = std::string("Bulkload paper ") + exName + std::string(" :") +
+                        std::string(" startingEntriesInIndex = ") + std::to_string(startingEntriesInIndex) +
+                        std::string(" entriesToInsert = ") + std::to_string(entriesToInsert) +
+                        std::string(" bulkloadPackageNumEntries = ") + bulkloadPackageSizeString +
+                        std::string(" rsearches = ") + std::to_string(rsearches) +
+                        std::string(" sel = ") + std::to_string(sel) +
+                        std::string(" indexesParams = {") +
+                        std::string(" bufferSize = ") + std::to_string(bufferSize) +
+                        std::string(" ssTableSize = ") + std::to_string(ssTableSize) +
+                        std::string(" levelRatio = ") + std::to_string(levelRatio) + std::string(" }") +
+                        std::string(" table = ") + table->toString();
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload packageSizeTEST started: {}", exName, label);
+
+    std::vector<std::string> names {"FA-LSM T=2", "FA-LSM T=4", "FA-LSM T=10", "LSM"};
+
+    std::vector<Workload> workloads;
+    for (size_t j = 0; j < packageSize.size(); ++j)
+    {
+        LOGGER_LOG_INFO("PAPER {}: Bulkload packageSizeTEST {} / {} started", exName, j + 1, packageSize.size());
+
+        Disk* disk = new DiskSSD_Samsung840();
+
+        DBIndex* falsm2 = new FALSMTree(names[0].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 2);
+        DBIndex* falsm4 = new FALSMTree(names[1].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 4);
+        DBIndex* falsm10 = new FALSMTree(names[2].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 10);
+        DBIndex* lsmClassic = new LSMTree(names[3].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, LSMTree::BULKLOAD_FEATURE_OFF);
+
+        std::vector<DBIndex*> indexes {falsm2, falsm4, falsm10, lsmClassic};
+        if (startingEntriesInIndex > 0)
+        {
+            for (size_t i = 0; i < indexes.size(); ++i)
+                indexes[i]->createTopologyAfterInsert(startingEntriesInIndex);
+
+            LOGGER_LOG_INFO("PAPER {}: Bulkload packageSizeTEST {} / {} Topology created with {} entries", exName, j + 1, packageSize.size(), startingEntriesInIndex);
+        }
+
+        std::vector<WorkloadStep*> steps;
+
+        size_t entriesLeft = entriesToInsert;
+        while (entriesLeft > 0)
+        {
+            size_t n = std::min(entriesLeft, packageSize[j]);
+            steps.push_back(new WorkloadStepBulkload(n));
+
+            entriesLeft -= n;
+
+            steps.push_back(new WorkloadStepRSearch(sel, rsearches));
+        }
+
+        Workload workload(indexes, steps);
+        workload.run();
+
+        for (size_t i = 0; i < indexes.size(); ++i)
+            if (indexes[i]->getNumEntries() != entriesToInsert + startingEntriesInIndex)
+                LOGGER_LOG_ERROR("PAPER {}: Bulkload packageSizeTEST Index {}, numEntries = {} != entriesToInsert {}", exName, indexes[i]->getName(), indexes[i]->getNumEntries(), entriesToInsert);
+
+
+        workloads.push_back(workload);
+
+        delete disk;
+        for (size_t i = 0; i < indexes.size(); ++i)
+            delete indexes[i];
+    }
+
+    std::string toPrint("");
+
+    toPrint += std::string("Batch size");
+    for (size_t i = 0; i < names.size(); ++i)
+        toPrint += std::string("\t") + names[i];
+    toPrint += std::string("\n");
+
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        toPrint += labels[i];
+        const std::vector<WorkloadCounters>& totalCounters = workloads[i].getAllTotalCounters();
+        for (size_t j = 0; j < totalCounters.size(); ++j)
+            toPrint += std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME));
+        toPrint += std::string("\n");
+    }
+
+    DBThreadPool::mutex.lock();
+
+    std::ofstream outfile;
+    std::string path(LSM_REAL_EXPERIMENTS_DIRECTORY_PATH);
+    path += std::string("/") + exName + std::string(".txt");
+    outfile.open(path);
+
+    outfile << toPrint << std::flush;
+
+    DBThreadPool::mutex.unlock();
+
+    delete table;
+
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload packageSizeTEST finished: {}", exName, label);
+}
+
+
+[[maybe_unused]] static void paper_bulkloadAndRSearchSelDatabaseSize(std::string exName, std::vector<std::string> labels, std::vector<size_t>databaseSize, size_t entriesToInsert,  size_t minRandom, size_t maxRandom, size_t rsearches, double sel, size_t ssTableSize, size_t bufferSize, size_t levelRatio)
+{
+    if (labels.size() != databaseSize.size())
+    {
+        LOGGER_LOG_ERROR("PAPER {} labels.size() {} != databaseSize.size() {}", exName, labels.size(), databaseSize.size());
+        return;
+    }
+
+    DBTable* table = new DBTable_TPCC_Warehouse();
+
+    auto buildStringFromVector = [](const std::string &accumulator, const size_t& size)
+    {
+        return accumulator.empty() ? std::to_string(size) : accumulator + ", " + std::to_string(size);
+    };
+
+    const std::string databaseSizeString =  std::string("{") + std::accumulate(std::begin(databaseSize), std::end(databaseSize), std::string(), buildStringFromVector) + std::string("}");
+
+    std::string label = std::string("Bulkload paper ") + exName + std::string(" :") +
+                        std::string(" startingEntriesInIndex = ") + databaseSizeString +
+                        std::string(" entriesToInsert = ") + std::to_string(entriesToInsert) +
+                        std::string(" bulkloadPackageNumEntries = [") + std::to_string(minRandom) + std::string(" - ") + std::to_string(maxRandom) + std::string("]") +
+                        std::string(" rsearches = ") + std::to_string(rsearches) +
+                        std::string(" sel = ") + std::to_string(sel) +
+                        std::string(" indexesParams = {") +
+                        std::string(" bufferSize = ") + std::to_string(bufferSize) +
+                        std::string(" ssTableSize = ") + std::to_string(ssTableSize) +
+                        std::string(" levelRatio = ") + std::to_string(levelRatio) + std::string(" }") +
+                        std::string(" table = ") + table->toString();
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload databaseSizeTEST started: {}", exName, label);
+
+    std::vector<Workload> workloads;
+
+    std::vector<std::string> names {"FA-LSM", "LSM"};
+    for (size_t j = 0; j < databaseSize.size(); ++j)
+    {
+        LOGGER_LOG_INFO("PAPER {}: Bulkload databaseSizeTEST {} / {} started", exName, j + 1, databaseSize.size());
+
+        Disk* disk = new DiskSSD_Samsung840();
+
+        DBIndex* falsm4 = new FALSMTree(names[0].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, 4);
+        DBIndex* lsmClassic = new LSMTree(names[1].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize, levelRatio, LSMTree::BULKLOAD_FEATURE_OFF);
+
+        std::vector<DBIndex*> indexes {falsm4, lsmClassic};
+        if (databaseSize[j] > 0)
+        {
+            for (size_t i = 0; i < indexes.size(); ++i)
+                indexes[i]->createTopologyAfterInsert(databaseSize[j]);
+
+            LOGGER_LOG_INFO("PAPER {}: Bulkload databaseSizeTEST {} / {} Topology created with {} entries", exName, j + 1, databaseSize.size(), databaseSize[j]);
+        }
+
+        std::vector<WorkloadStep*> steps;
+
+        std::mt19937 rng(MY_LUCKY_SEED);
+        std::uniform_int_distribution<size_t> randomizer(minRandom, maxRandom);
+
+        size_t entriesLeft = entriesToInsert;
+        while (entriesLeft > 0)
+        {
+            size_t n = std::min(entriesLeft, randomizer(rng));
+            steps.push_back(new WorkloadStepBulkload(n));
+
+            entriesLeft -= n;
+
+            steps.push_back(new WorkloadStepRSearch(sel, rsearches));
+        }
+
+        Workload workload(indexes, steps);
+        workload.run();
+
+        for (size_t i = 0; i < indexes.size(); ++i)
+            if (indexes[i]->getNumEntries() != entriesToInsert + databaseSize[j])
+                LOGGER_LOG_ERROR("PAPER {}: Bulkload databaseSizeTEST Index {}, numEntries = {} != entriesToInsert {}", exName, indexes[i]->getName(), indexes[i]->getNumEntries(), entriesToInsert);
+
+
+        workloads.push_back(workload);
+
+        delete disk;
+        for (size_t i = 0; i < indexes.size(); ++i)
+            delete indexes[i];
+    }
+
+    std::string toPrint("");
+
+    toPrint += std::string("Database size\tBulk loading time\tSearch time\tTotal Time\tLSM Total time\n");
+
+
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        toPrint += labels[i]; // 10, 100, 500 - package size
+
+        const std::vector<WorkloadCounters>& totalCounters = workloads[i].getAllTotalCounters();
+        double lsmTotalTime = totalCounters[totalCounters.size() - 1].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME);
+        for (size_t j = 0; j < totalCounters.size() - 1; ++j) // last is lsmtree
+            toPrint +=  std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_RSEARCH_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(lsmTotalTime) +
+                        std::string("\n");
+    }
+
+    DBThreadPool::mutex.lock();
+
+    std::ofstream outfile;
+    std::string path(LSM_REAL_EXPERIMENTS_DIRECTORY_PATH);
+    path += std::string("/") + exName + std::string(".txt");
+    outfile.open(path);
+
+    outfile << toPrint << std::flush;
+
+    DBThreadPool::mutex.unlock();
+
+    delete table;
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload databaseSizeTEST finished: {}", exName, label);
+}
+
+[[maybe_unused]] static void paper_bulkloadAndRSearchSelSSTableSize(std::string exName, std::vector<std::string> labels, std::vector<size_t>ssTableSize, size_t startingEntriesInIndex, size_t entriesToInsert,  size_t minRandom, size_t maxRandom,  size_t rsearches, double sel, size_t bufferSize, size_t levelRatio)
+{
+    if (labels.size() != ssTableSize.size())
+    {
+        LOGGER_LOG_ERROR("PAPER {} labels.size() {} != ssTableSize.size() {}", exName, labels.size(), ssTableSize.size());
+        return;
+    }
+
+    DBTable* table = new DBTable_TPCC_Warehouse();
+
+    auto buildStringFromVector = [](const std::string &accumulator, const size_t& size)
+    {
+        return accumulator.empty() ? std::to_string(size) : accumulator + ", " + std::to_string(size);
+    };
+
+    const std::string SSTableSizeString =  std::string("{") + std::accumulate(std::begin(ssTableSize), std::end(ssTableSize), std::string(), buildStringFromVector) + std::string("}");
+
+    std::string label = std::string("Bulkload sandbox ") + exName + std::string(" :") +
+                        std::string(" startingEntriesInIndex = ") + std::to_string(startingEntriesInIndex) +
+                        std::string(" entriesToInsert = ") + std::to_string(entriesToInsert) +
+                        std::string(" bulkloadPackageNumEntries = [") + std::to_string(minRandom) + std::string(" - ") + std::to_string(maxRandom) + std::string("]") +
+                        std::string(" indexesParams = {") +
+                        std::string(" bufferSize = ") + std::to_string(bufferSize) +
+                        std::string(" ssTableSize = ") + SSTableSizeString +
+                        std::string(" levelRatio = ") + std::to_string(levelRatio) + std::string(" }") +
+                        std::string(" table = ") + table->toString();
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload ssTableTEST started: {}", exName, label);
+
+    std::vector<Workload> workloads;
+
+    std::vector<std::string> names {"FA-LSM", "LSM"};
+    for (size_t j = 0; j < ssTableSize.size(); ++j)
+    {
+        LOGGER_LOG_INFO("PAPER {}: Bulkload ssTableTEST {} / {} started", exName, j + 1, ssTableSize.size());
+
+        Disk* disk = new DiskSSD_Samsung840();
+
+        DBIndex* falsm4 = new FALSMTree(names[0].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize[j], bufferSize, levelRatio, 4);
+        DBIndex* lsmClassic = new LSMTree(names[1].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize[j], bufferSize, levelRatio, LSMTree::BULKLOAD_FEATURE_OFF);
+
+        std::vector<DBIndex*> indexes {falsm4, lsmClassic};
+        if (startingEntriesInIndex > 0)
+        {
+            for (size_t i = 0; i < indexes.size(); ++i)
+                indexes[i]->createTopologyAfterInsert(startingEntriesInIndex);
+
+            LOGGER_LOG_INFO("PAPER {}: Bulkload ssTableTEST {} / {} Topology created with {} entries", exName, j + 1, ssTableSize.size(), startingEntriesInIndex);
+        }
+
+        std::vector<WorkloadStep*> steps;
+
+        std::mt19937 rng(MY_LUCKY_SEED);
+        std::uniform_int_distribution<size_t> randomizer(minRandom, maxRandom);
+
+        size_t entriesLeft = entriesToInsert;
+        while (entriesLeft > 0)
+        {
+            size_t n = std::min(entriesLeft, randomizer(rng));
+            steps.push_back(new WorkloadStepBulkload(n));
+
+            entriesLeft -= n;
+
+            steps.push_back(new WorkloadStepRSearch(sel, rsearches));
+        }
+
+        Workload workload(indexes, steps);
+        workload.run();
+
+        for (size_t i = 0; i < indexes.size(); ++i)
+            if (indexes[i]->getNumEntries() != entriesToInsert + startingEntriesInIndex)
+                LOGGER_LOG_ERROR("PAPER {}: Bulkload ssTableTEST Index {}, numEntries = {} != entriesToInsert {}", exName, indexes[i]->getName(), indexes[i]->getNumEntries(), entriesToInsert);
+
+
+        workloads.push_back(workload);
+
+        delete disk;
+        for (size_t i = 0; i < indexes.size(); ++i)
+            delete indexes[i];
+    }
+
+    std::string toPrint("");
+
+    toPrint += std::string("SSTable size\tBulk loading time\tSearch time\tTotal Time\tLSM Total time\n");
+
+
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        toPrint += labels[i]; // ssTableSize
+
+        const std::vector<WorkloadCounters>& totalCounters = workloads[i].getAllTotalCounters();
+        double lsmTotalTime = totalCounters[totalCounters.size() - 1].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME);
+        for (size_t j = 0; j < totalCounters.size() - 1; ++j) // last is lsmtree
+            toPrint +=  std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_RSEARCH_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(lsmTotalTime) +
+                        std::string("\n");
+    }
+
+    DBThreadPool::mutex.lock();
+
+    std::ofstream outfile;
+    std::string path(LSM_REAL_EXPERIMENTS_DIRECTORY_PATH);
+    path += std::string("/") + exName + std::string(".txt");
+    outfile.open(path);
+
+    outfile << toPrint << std::flush;
+
+    DBThreadPool::mutex.unlock();
+
+    delete table;
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload ssTableTEST finished: {}", exName, label);
+}
+
+[[maybe_unused]] static void paper_bulkloadAndRSearchSelBufferSize(std::string exName, std::vector<std::string> labels, std::vector<size_t>bufferSize, size_t startingEntriesInIndex, size_t entriesToInsert,  size_t minRandom, size_t maxRandom, size_t rsearches, double sel, size_t ssTableSize, size_t levelRatio)
+{
+    if (labels.size() != bufferSize.size())
+    {
+        LOGGER_LOG_ERROR("PAPER {} labels.size() {} != bufferSize.size() {}", exName, labels.size(), bufferSize.size());
+        return;
+    }
+
+    DBTable* table = new DBTable_TPCC_Warehouse();
+
+    auto buildStringFromVector = [](const std::string &accumulator, const size_t& size)
+    {
+        return accumulator.empty() ? std::to_string(size) : accumulator + ", " + std::to_string(size);
+    };
+
+    const std::string bufferSizeString =  std::string("{") + std::accumulate(std::begin(bufferSize), std::end(bufferSize), std::string(), buildStringFromVector) + std::string("}");
+
+    std::string label = std::string("Bulkload sandbox ") + exName + std::string(" :") +
+                        std::string(" startingEntriesInIndex = ") + std::to_string(startingEntriesInIndex) +
+                        std::string(" entriesToInsert = ") + std::to_string(entriesToInsert) +
+                        std::string(" bulkloadPackageNumEntries = [") + std::to_string(minRandom) + std::string(" - ") + std::to_string(maxRandom) + std::string("]") +
+                        std::string(" rsearches = ") + std::to_string(rsearches) +
+                        std::string(" sel = ") + std::to_string(sel) +
+                        std::string(" indexesParams = {") +
+                        std::string(" bufferSize = ") + bufferSizeString +
+                        std::string(" ssTableSize = ") +  std::to_string(ssTableSize) +
+                        std::string(" levelRatio = ") + std::to_string(levelRatio) + std::string(" }") +
+                        std::string(" table = ") + table->toString();
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload BufferSizeTEST started: {}", exName, label);
+
+    std::vector<Workload> workloads;
+
+    std::vector<std::string> names {"FA-LSM", "LSM"};
+    for (size_t j = 0; j < bufferSize.size(); ++j)
+    {
+        LOGGER_LOG_INFO("PAPER {}: Bulkload BufferSizeTEST {} / {} started", exName, j + 1, bufferSize.size());
+
+        Disk* disk = new DiskSSD_Samsung840();
+
+        DBIndex* falsm4 = new FALSMTree(names[0].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize[j], levelRatio, 4);
+        DBIndex* lsmClassic = new LSMTree(names[1].c_str(), disk->clone(), table->getKeySize(), table->getDataSize(), ssTableSize, bufferSize[j], levelRatio, LSMTree::BULKLOAD_FEATURE_OFF);
+
+        std::vector<DBIndex*> indexes {falsm4, lsmClassic};
+        if (startingEntriesInIndex > 0)
+        {
+            for (size_t i = 0; i < indexes.size(); ++i)
+                indexes[i]->createTopologyAfterInsert(startingEntriesInIndex);
+
+            LOGGER_LOG_INFO("PAPER {}: Bulkload BufferSizeTEST {} / {} Topology created with {} entries", exName, j + 1, bufferSize.size(), startingEntriesInIndex);
+        }
+
+        std::vector<WorkloadStep*> steps;
+
+        std::mt19937 rng(MY_LUCKY_SEED);
+        std::uniform_int_distribution<size_t> randomizer(minRandom, maxRandom);
+
+        size_t entriesLeft = entriesToInsert;
+        while (entriesLeft > 0)
+        {
+            size_t n = std::min(entriesLeft, randomizer(rng));
+            steps.push_back(new WorkloadStepBulkload(n));
+
+            entriesLeft -= n;
+
+            steps.push_back(new WorkloadStepRSearch(sel, rsearches));
+        }
+
+        Workload workload(indexes, steps);
+        workload.run();
+
+        for (size_t i = 0; i < indexes.size(); ++i)
+            if (indexes[i]->getNumEntries() != entriesToInsert + startingEntriesInIndex)
+                LOGGER_LOG_ERROR("PAPER {}: Bulkload BufferSizeTEST Index {}, numEntries = {} != entriesToInsert {}", exName, indexes[i]->getName(), indexes[i]->getNumEntries(), entriesToInsert);
+
+
+        workloads.push_back(workload);
+
+        delete disk;
+        for (size_t i = 0; i < indexes.size(); ++i)
+            delete indexes[i];
+    }
+
+    std::string toPrint("");
+
+    toPrint += std::string("Buffer size\tBulk loading time\tSearch time\tTotal Time\tLSM Total time\n");
+
+
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        toPrint += labels[i]; // bufferSize
+
+        const std::vector<WorkloadCounters>& totalCounters = workloads[i].getAllTotalCounters();
+        double lsmTotalTime = totalCounters[totalCounters.size() - 1].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME);
+        for (size_t j = 0; j < totalCounters.size() - 1; ++j) // last is lsmtree
+            toPrint +=  std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_BULKLOAD_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_RSEARCH_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(totalCounters[j].getCounterValue(WorkloadCounters::WORKLOAD_COUNTER_RW_TOTAL_TIME)) +
+                        std::string("\t") + std::to_string(lsmTotalTime) +
+                        std::string("\n");
+    }
+
+    DBThreadPool::mutex.lock();
+
+    std::ofstream outfile;
+    std::string path(LSM_REAL_EXPERIMENTS_DIRECTORY_PATH);
+    path += std::string("/") + exName + std::string(".txt");
+    outfile.open(path);
+
+    outfile << toPrint << std::flush;
+
+    DBThreadPool::mutex.unlock();
+    delete table;
+
+    LOGGER_LOG_INFO("PAPER {}: Bulkload BufferSizeTEST finished: {}", exName, label);
+}
+
 /**
  * @brief Main Paper Sandbox function
  *        By calling this function you will execute all
@@ -1709,6 +2281,7 @@ void sandboxLSMPaper()
     futures.push_back(DBThreadPool::threadPool.submit(sandbox_bulkloadAndRSearchSelDatabaseSize, "ex5", std::vector<std::string>{"0mln", "10mln", "20mln", "30mln", "40mln", "50mln", "60mln", "70mln", "80mln", "90mln", "100mln"}, std::vector<size_t>{0, 10000000, 20000000, 30000000, 40000000, 50000000, 60000000, 70000000, 80000000, 90000000, 100000000}, 10000000, 100000 / 2, 100000, 100, 0.01, 1 << 21, 1 << 21, 5));
     futures.push_back(DBThreadPool::threadPool.submit(sandbox_bulkloadAndRSearchSelDatabaseSize, "ex5", std::vector<std::string>{"0mln", "10mln", "20mln", "30mln", "40mln", "50mln", "60mln", "70mln", "80mln", "90mln", "100mln"}, std::vector<size_t>{0, 10000000, 20000000, 30000000, 40000000, 50000000, 60000000, 70000000, 80000000, 90000000, 100000000}, 10000000, 100000 / 2, 100000, 250, 0.01, 1 << 21, 1 << 21, 5));
 
+    LOGGER_LOG_INFO("LSM Sandbox {} job created", futures.size());
     for (size_t i = 0; i < futures.size(); ++i)
     {
         bool isComplete = futures[i].get();
@@ -1717,6 +2290,7 @@ void sandboxLSMPaper()
 
     LOGGER_LOG_INFO("Finished {} tasks from LSM Sandbox", futures.size());
 }
+
 
 
 /**
@@ -1728,6 +2302,30 @@ void experimentLSMPaper()
 {
     LOGGER_LOG_INFO("Starting LSM paper experiments");
 
+    std::filesystem::create_directories(LSM_REAL_EXPERIMENTS_DIRECTORY_PATH);
 
-    LOGGER_LOG_INFO("LSM paper experiments finished");
+    std::vector<std::future<bool>> futures;
+
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchRandomSel, "ex0_20rsearches", 0, 10000000, 100000 / 2, 100000, 20, 0.01, 1 << 21, 1 << 21, 5)); // opt 25
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchRandomSel, "ex0_40rsearches", 0, 10000000, 100000 / 2, 100000, 40, 0.01, 1 << 21, 1 << 21, 5)); // opt 5
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchRandomSel, "ex0_100rsearches", 0, 10000000, 100000 / 2, 100000, 100, 0.01, 1 << 21, 1 << 21, 5)); // opt 2-4
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchRandomSel, "ex0_250rsearches", 0, 10000000, 100000 / 2, 100000, 250, 0.01, 1 << 21, 1 << 21, 5)); // opt 1
+
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchSelPackageSize, "ex1_0rsearches", std::vector<std::string>{"10", "50", "100", "200", "300", "400", "500"}, std::vector<size_t>{10000, 50000, 100000, 200000, 300000, 400000, 500000}, 0, 10000000, 0, 0.0, 1 << 21, 1 << 21, 5));
+
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchSelSSTableSize, "ex2_20rsearches_T4", std::vector<std::string>{"2MB", "4MB", "8MB", "16MB"}, std::vector<size_t>{1 << 21, 1 << 22, 1 << 23, 1 << 24}, 0, 10000000, 100000 / 2, 100000, 20, 0.01, 1 << 21, 5));
+
+    futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchSelBufferSize, "ex3_20rsearches_T4", std::vector<std::string>{"2MB", "4MB", "8MB", "16MB"}, std::vector<size_t>{1 << 21, 1 << 22, 1 << 23, 1 << 24}, 0, 10000000, 100000 / 2, 100000, 20, 0.01, 1 << 21, 5));
+
+
+    // futures.push_back(DBThreadPool::threadPool.submit(paper_bulkloadAndRSearchSelDatabaseSize, "ex5_20rsearches_T4", std::vector<std::string>{"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"}, std::vector<size_t>{0, 10000000, 20000000, 30000000, 40000000, 50000000, 60000000, 70000000, 80000000, 90000000, 100000000}, 10000000, 100000 / 2, 100000, 20, 0.01, 1 << 21, 1 << 21, 5));
+
+    LOGGER_LOG_INFO("LSM paper experiments {} job created", futures.size());
+    for (size_t i = 0; i < futures.size(); ++i)
+    {
+        bool isComplete = futures[i].get();
+        (void) isComplete;
+    }
+
+    LOGGER_LOG_INFO("Finished {} tasks from LSM paper experiments", futures.size());
 }
