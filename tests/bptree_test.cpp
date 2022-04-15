@@ -1065,7 +1065,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, insertIntoRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1109,7 +1109,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, insertIntoInner)
     const size_t numOperations = nodeSize / recordSize;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1222,7 +1222,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, singleBulkload)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
     DBIndex* index = bp;
@@ -1253,7 +1253,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, severalBulkloads)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
     DBIndex* index = bp;
@@ -1307,7 +1307,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, findPointInRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1364,7 +1364,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, findPointInBigTree)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
     const size_t numOperations = 10;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
@@ -1411,7 +1411,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, findRangeInRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1470,7 +1470,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, findRangeInBigTree)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
     const size_t numOperations = 10;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
@@ -1518,7 +1518,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, deleteFromRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1585,7 +1585,7 @@ GTEST_TEST(bptreeBasicFlashFTLTest, deleteFromInner)
     const size_t numOperations = nodeSize / recordSize;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1842,7 +1842,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, insertIntoRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1877,7 +1877,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, insertIntoInner)
     const size_t numOperations = nodeSize / recordSize;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -1952,7 +1952,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, singleBulkload)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
     DBIndex* index = bp;
@@ -1984,7 +1984,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, severalBulkloads)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
     DBIndex* index = bp;
@@ -2036,7 +2036,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, findPointInRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -2084,7 +2084,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, findPointInBigTree)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
     const size_t numOperations = 100;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
@@ -2135,7 +2135,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, findRangeInRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -2188,7 +2188,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, findRangeInBigTree)
     const size_t pagesInBlock = disk->getLowLevelController().getBlockSize() / disk->getLowLevelController().getPageSize();
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
     const size_t numOperations = 100;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize, true);
@@ -2243,7 +2243,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, deleteFromRoot)
     const size_t numOperations = nodeSize / recordSize - 1;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;
@@ -2292,7 +2292,7 @@ GTEST_TEST(bptreeBasicFlashRawTest, deleteFromInner)
     const size_t numOperations = nodeSize / recordSize;
     const double readTime = 35.0 / 1000000.0;
     const double writeTime = 350.0 / 1000000.0;
-    const double eraseTime = 1500.0 / 1000000.0;
+    const double eraseTime = (128.0 * 1500.0) / 1000000.0;
 
     BPTree* bp = new BPTree(disk, keySize, dataSize, nodeSize);
     DBIndex* index = bp;

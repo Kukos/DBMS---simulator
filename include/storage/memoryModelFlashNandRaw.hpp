@@ -84,7 +84,7 @@ class MemoryModelFlashNandRaw_SamsungK9F1G08U0D : public MemoryModelFlashNandRaw
 {
 public:
     MemoryModelFlashNandRaw_SamsungK9F1G08U0D()
-    : MemoryModelFlashNandRaw("FlashNandRaw:samsungK9F1G08U0D", 2048, 2048 * 32, 35.0 / 1000000.0, 250.0 / 1000000.0, 2000.0 / 1000000.0)
+    : MemoryModelFlashNandRaw("FlashNandRaw:samsungK9F1G08U0D", 2048, 2048 * 32, 35.0 / 1000000.0, 250.0 / 1000000.0, (2000.0 * 32) / 1000000.0)
     {
 
     }
@@ -106,7 +106,7 @@ class MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA : public MemoryModelFlashNan
 {
 public:
     MemoryModelFlashNandRaw_MicronMT29F32G08ABAAA()
-    : MemoryModelFlashNandRaw("FlashNandRaw:micronMT29F32G08ABAAA", 8192, 8192 * 128, 35.0 / 1000000.0, 350.0 / 1000000.0, 1500.0 / 1000000.0)
+    : MemoryModelFlashNandRaw("FlashNandRaw:micronMT29F32G08ABAAA", 8192, 8192 * 128, 35.0 / 1000000.0, 350.0 / 1000000.0, (128 * 1500.0) / 1000000.0)
     {
 
     }
@@ -128,7 +128,7 @@ class MemoryModelFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1 : public MemoryModel
 {
 public:
     MemoryModelFlashNandRaw_MicronMT29F32G08CBEDBL83A3WC1()
-    : MemoryModelFlashNandRaw("FlashNandRaw:micronMT29F32G08CBEDBL83A3WC1", 4096, 4096 * 128, 50.0 / 1000000.0, 900.0 / 1000000.0, 3500 / 1000000.0)
+    : MemoryModelFlashNandRaw("FlashNandRaw:micronMT29F32G08CBEDBL83A3WC1", 4096, 4096 * 128, 50.0 / 1000000.0, 900.0 / 1000000.0, (128 * 3500) / 1000000.0)
     {
 
     }
