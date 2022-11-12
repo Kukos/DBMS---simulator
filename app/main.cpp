@@ -5,6 +5,8 @@
 
 extern void experimentLSMPaper();
 extern void sandboxLSMPaper();
+extern void experimentPhdFATree();
+extern void experimentPhdFALSMTree();
 
 int main()
 {
@@ -14,7 +16,10 @@ int main()
     std::cout << "Database Management System - simulator" << std::endl;
 
     // sandboxLSMPaper();
-    experimentLSMPaper();
+    // experimentLSMPaper();
+
+    // experimentPhdFATree();
+    experimentPhdFALSMTree();
 
     DBThreadPool::threadPool.wait_for_tasks();
 

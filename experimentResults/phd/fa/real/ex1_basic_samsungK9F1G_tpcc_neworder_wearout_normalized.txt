@@ -1,0 +1,4 @@
+Workload	B+-Tree	LSM-Tree	FA-Tree
+ZP_{zapis}	49.008325	1.000000	1.000000
+ZP_{odczyt}	63.521583	1.000000	1.000000
+ZP_{balans}	54.876321	1.000000	1.000000

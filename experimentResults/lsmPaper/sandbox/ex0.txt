@@ -1,0 +1,60 @@
+Testing bulkload + rsearch	Bulkload sandbox ex0 : startingEntriesInIndex = 0 entriesToInsert = 10000000 bulkloadPackageNumEntries = [50000 - 100000] rsearches = 20 sel = 0.010000 indexesParams = { bufferSize = 2097152 ssTableSize = 2097152 levelRatio = 5 } table = DBTable { .name = TPC-C Warehouse .sizeKey = 8 .sizeData = 105 .sizeRecord = 113 .columnsSize = { 8,10,20,20,20,2,9,8,16 } }
+BulkoadTime	RSearchTime	TotalTime
+FALSM capRatio=1	34.551181	28.427560	62.978741
+FALSM capRatio=2	21.600352	29.637160	51.237512
+FALSM capRatio=3	21.600352	29.637160	51.237512
+FALSM capRatio=4	21.600352	29.637160	51.237512
+FALSM capRatio=5	20.829966	29.837500	50.667466
+FALSM capRatio=10	11.404764	35.949760	47.354524
+FALSM capRatio=15	11.404764	35.949760	47.354524
+FALSM capRatio=20	11.404764	35.949760	47.354524
+FALSM capRatio=25	8.368815	36.959020	45.327835
+FALSM capRatio=50	2.111522	62.734840	64.846362
+LSMTree insert	42.896073	28.382200	71.278273
+LSMTree bulkload	35.299897	28.393540	63.693437
+
+Testing bulkload + rsearch	Bulkload sandbox ex0 : startingEntriesInIndex = 0 entriesToInsert = 10000000 bulkloadPackageNumEntries = [50000 - 100000] rsearches = 40 sel = 0.010000 indexesParams = { bufferSize = 2097152 ssTableSize = 2097152 levelRatio = 5 } table = DBTable { .name = TPC-C Warehouse .sizeKey = 8 .sizeData = 105 .sizeRecord = 113 .columnsSize = { 8,10,20,20,20,2,9,8,16 } }
+BulkoadTime	RSearchTime	TotalTime
+FALSM capRatio=1	34.551181	56.855120	91.406301
+FALSM capRatio=2	21.600352	59.274320	80.874672
+FALSM capRatio=3	21.600352	59.274320	80.874672
+FALSM capRatio=4	21.600352	59.274320	80.874672
+FALSM capRatio=5	20.829966	59.675000	80.504966
+FALSM capRatio=10	11.404764	71.899520	83.304284
+FALSM capRatio=15	11.404764	71.899520	83.304284
+FALSM capRatio=20	11.404764	71.899520	83.304284
+FALSM capRatio=25	8.368815	73.918040	82.286855
+FALSM capRatio=50	2.111522	125.469680	127.581202
+LSMTree insert	42.896073	56.764400	99.660473
+LSMTree bulkload	35.299897	56.787080	92.086976
+
+Testing bulkload + rsearch	Bulkload sandbox ex0 : startingEntriesInIndex = 0 entriesToInsert = 10000000 bulkloadPackageNumEntries = [50000 - 100000] rsearches = 100 sel = 0.010000 indexesParams = { bufferSize = 2097152 ssTableSize = 2097152 levelRatio = 5 } table = DBTable { .name = TPC-C Warehouse .sizeKey = 8 .sizeData = 105 .sizeRecord = 113 .columnsSize = { 8,10,20,20,20,2,9,8,16 } }
+BulkoadTime	RSearchTime	TotalTime
+FALSM capRatio=1	34.551181	142.137800	176.688981
+FALSM capRatio=2	21.600352	148.185800	169.786152
+FALSM capRatio=3	21.600352	148.185800	169.786152
+FALSM capRatio=4	21.600352	148.185800	169.786152
+FALSM capRatio=5	20.829966	149.187500	170.017466
+FALSM capRatio=10	11.404764	179.748800	191.153564
+FALSM capRatio=15	11.404764	179.748800	191.153564
+FALSM capRatio=20	11.404764	179.748800	191.153564
+FALSM capRatio=25	8.368815	184.795100	193.163915
+FALSM capRatio=50	2.111522	313.674200	315.785722
+LSMTree insert	42.896073	141.911000	184.807073
+LSMTree bulkload	35.299897	141.967700	177.267596
+
+Testing bulkload + rsearch	Bulkload sandbox ex0 : startingEntriesInIndex = 0 entriesToInsert = 10000000 bulkloadPackageNumEntries = [50000 - 100000] rsearches = 250 sel = 0.010000 indexesParams = { bufferSize = 2097152 ssTableSize = 2097152 levelRatio = 5 } table = DBTable { .name = TPC-C Warehouse .sizeKey = 8 .sizeData = 105 .sizeRecord = 113 .columnsSize = { 8,10,20,20,20,2,9,8,16 } }
+BulkoadTime	RSearchTime	TotalTime
+FALSM capRatio=1	34.551181	355.344500	389.895681
+FALSM capRatio=2	21.600352	370.464500	392.064852
+FALSM capRatio=3	21.600352	370.464500	392.064852
+FALSM capRatio=4	21.600352	370.464500	392.064852
+FALSM capRatio=5	20.829966	372.968750	393.798716
+FALSM capRatio=10	11.404764	449.372000	460.776764
+FALSM capRatio=15	11.404764	449.372000	460.776764
+FALSM capRatio=20	11.404764	449.372000	460.776764
+FALSM capRatio=25	8.368815	461.987750	470.356565
+FALSM capRatio=50	2.111522	784.185500	786.297022
+LSMTree insert	42.896073	354.777500	397.673573
+LSMTree bulkload	35.299897	354.919250	390.219147
+

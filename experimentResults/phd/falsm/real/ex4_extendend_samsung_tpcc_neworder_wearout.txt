@@ -1,0 +1,5 @@
+Workload	LSM-Tree	FALSM-Tree
+ZR_{A}	0	0
+ZR_{B}	58	58
+ZR_{C}	24005	4474
+ZR_{D}	2097	501

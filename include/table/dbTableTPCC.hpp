@@ -33,7 +33,7 @@ class DBTable_TPCC_Customer : public DBTable
 {
 public:
     DBTable_TPCC_Customer()
-    : DBTable("TPC-C Customer", std::vector<size_t>{8, 8, 8, 16, 2, 16, 20, 20, 20, 2, 9, 16, 8, 2, 16, 8, 16, 16, 4, 4, 500})
+    : DBTable("TPC-C Customer", std::vector<size_t>{4, 4, 8, 16, 2, 16, 20, 20, 20, 2, 9, 16, 8, 2, 16, 8, 16, 16, 4, 4, 500})
     {
 
     }
@@ -80,5 +80,32 @@ public:
     DBTable_TPCC_Stock(DBTable_TPCC_Stock &&) = default;
     DBTable_TPCC_Stock& operator=(DBTable_TPCC_Stock &&) = default;
 };
+
+class DBTable_TPCC_NewOrder : public DBTable
+{
+public:
+    DBTable_TPCC_NewOrder()
+    : DBTable("TPC-C NewOrder", std::vector<size_t>{8, 4, 8})
+    {
+
+    }
+
+    /**
+     * @brief Virtual constructor idiom
+     *
+     * @return clone of table
+     */
+    virtual DBTable* clone() noexcept(true)
+    {
+        return new DBTable_TPCC_NewOrder(*this);
+    }
+
+    virtual ~DBTable_TPCC_NewOrder() = default;
+    DBTable_TPCC_NewOrder(const DBTable_TPCC_NewOrder&) = default;
+    DBTable_TPCC_NewOrder& operator=(const DBTable_TPCC_NewOrder&) = default;
+    DBTable_TPCC_NewOrder(DBTable_TPCC_NewOrder &&) = default;
+    DBTable_TPCC_NewOrder& operator=(DBTable_TPCC_NewOrder &&) = default;
+};
+
 
 #endif
