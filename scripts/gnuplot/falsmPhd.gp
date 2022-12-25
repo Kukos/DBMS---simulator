@@ -72,28 +72,28 @@ set yrange[0:90]
 set output "./experimentPlots/phd/falsm/ex0_20rsearches_samsung_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_20rsearches_samsung_warehouse.txt' using 1:col title columnheader
 
 set yrange[0:*]
 set output "./experimentPlots/phd/falsm/ex0_40rsearches_samsung_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_40rsearches_samsung_warehouse.txt' using 1:col title columnheader
 
 set yrange[0:*]
 set output "./experimentPlots/phd/falsm/ex0_100rsearches_samsung_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_100rsearches_samsung_warehouse.txt' using 1:col title columnheader
 
 set yrange[0:*]
 set output "./experimentPlots/phd/falsm/ex0_250rsearches_samsung_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_250rsearches_samsung_warehouse.txt' using 1:col title columnheader
 
 
@@ -101,28 +101,28 @@ set yrange[0:30]
 set output "./experimentPlots/phd/falsm/ex0_40rsearches_samsung_neworder.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_40rsearches_samsung_neworder.txt' using 1:col title columnheader
 
 set yrange[0:50]
 set output "./experimentPlots/phd/falsm/ex0_100rsearches_samsung_neworder.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_100rsearches_samsung_neworder.txt' using 1:col title columnheader
 
 set yrange[0:1000]
 set output "./experimentPlots/phd/falsm/ex0_40rsearches_samsung_customer.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_40rsearches_samsung_customer.txt' using 1:col title columnheader
 
 set yrange[0:1500]
 set output "./experimentPlots/phd/falsm/ex0_100rsearches_samsung_customer.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_100rsearches_samsung_customer.txt' using 1:col title columnheader
 
 
@@ -131,14 +131,14 @@ set yrange[0:150]
 set output "./experimentPlots/phd/falsm/ex0_40rsearches_toshiba_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_40rsearches_toshiba_warehouse.txt' using 1:col title columnheader
 
 set yrange[0:300]
 set output "./experimentPlots/phd/falsm/ex0_100rsearches_toshiba_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_100rsearches_toshiba_warehouse.txt' using 1:col title columnheader
 
 
@@ -146,14 +146,14 @@ set yrange[0:50]
 set output "./experimentPlots/phd/falsm/ex0_40rsearches_intel_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_40rsearches_intel_warehouse.txt' using 1:col title columnheader
 
 set yrange[0:*]
 set output "./experimentPlots/phd/falsm/ex0_100rsearches_intel_warehouse.pdf"
 set title ""
 set ylabel "CZAS [s]"
-set xlabel "parametr T"
+set xlabel "Parametr T"
 plot for [col=2:5] './experimentResults/phd/falsm/real/ex0_100rsearches_intel_warehouse.txt' using 1:col title columnheader
 
 

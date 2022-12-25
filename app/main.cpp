@@ -7,6 +7,7 @@ extern void experimentLSMPaper();
 extern void sandboxLSMPaper();
 extern void experimentPhdFATree();
 extern void experimentPhdFALSMTree();
+extern void experimentPhdCFDTree();
 
 int main()
 {
@@ -19,7 +20,8 @@ int main()
     // experimentLSMPaper();
 
     // experimentPhdFATree();
-    experimentPhdFALSMTree();
+    // experimentPhdFALSMTree();
+    experimentPhdCFDTree();
 
     DBThreadPool::threadPool.wait_for_tasks();
 

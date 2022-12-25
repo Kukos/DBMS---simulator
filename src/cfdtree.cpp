@@ -13,7 +13,7 @@ CFDTree::CFDTree(const char* name, Disk* disk, const std::vector<size_t>& column
     for (size_t i = 0; i < columnsSize.size(); ++i)
     {
         const size_t cNodeSize = i == 0 ? (maxEntries * (columnsSize[i])) : (maxEntries * (columnsSize[i] + columnsSize[0]));
-        fdColumns.push_back(FDTree(new Disk(*disk), columnsSize[0], i == 0 ? 0 : columnsSize[i], nodeSize, cNodeSize * headTreeMultipler, lvlRatio));
+        fdColumns.push_back(FDTree(new Disk(*disk), columnsSize[i], 0, nodeSize, cNodeSize * headTreeMultipler, lvlRatio));
     }
 
     LOGGER_LOG_DEBUG("CFDTree created {}", toStringFull());
