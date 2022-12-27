@@ -1,0 +1,2 @@
+Adaptive Merging	Lazy Adaptive Merging
+652.575426	566.136204

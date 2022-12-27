@@ -1,0 +1,2 @@
+Adaptive Merging	Lazy Adaptive Merging
+88.985225	69.799497

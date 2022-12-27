@@ -1,0 +1,2 @@
+Adaptive Merging	Lazy Adaptive Merging
+593.425079	532.126913

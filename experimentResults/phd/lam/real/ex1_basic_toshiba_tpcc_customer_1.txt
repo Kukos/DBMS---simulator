@@ -1,0 +1,2 @@
+Adaptive Merging	Lazy Adaptive Merging
+720.435865	569.420914

@@ -1,0 +1,2 @@
+Adaptive Merging	Lazy Adaptive Merging
+69.788336	24.048826

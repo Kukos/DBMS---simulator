@@ -1,0 +1,2 @@
+Adaptive Merging	Lazy Adaptive Merging
+105.017089	77.796826

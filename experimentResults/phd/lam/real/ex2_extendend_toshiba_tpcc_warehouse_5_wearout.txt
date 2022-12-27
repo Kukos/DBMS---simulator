@@ -1,0 +1,5 @@
+Workload	Adaptive Merging	Lazy Adaptive Merging
+ZR_{A}	17533	16856
+ZR_{B}	12125	11870
+ZR_{C}	235541	234858
+ZR_{D}	35609	35134
