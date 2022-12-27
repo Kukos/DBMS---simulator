@@ -459,6 +459,14 @@ double FDTree::findEntriesHelper(size_t numEntries, size_t numOperations) noexce
         return 0.0;
     }
 
+    // Only for testing
+    // for (size_t i = 0; i < numOperations; ++i)
+    // {
+    //     uintptr_t addr = disk->getCurrentMemoryAddr();
+    //     time += disk->readBytes(addr, numEntries * getRecordSize());
+    //     time += disk->flushCache();
+    // }
+
     for (size_t i = 0; i < numOperations; ++i)
         for (size_t j = 0; j < getHeight(); ++j)
         {
