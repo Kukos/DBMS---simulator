@@ -5,7 +5,7 @@ double MemoryModelSSD::readPagesRandom(size_t pages) const noexcept(true)
 {
     const double time = static_cast<double>(pages) * readRandomTime;
 
-    LOGGER_LOG_TRACE("reading pages(random) {}, took time {}", pages, time);
+    // LOGGER_LOG_TRACE("reading pages(random) {}, took time {}", pages, time);
     return time;
 }
 
@@ -15,7 +15,7 @@ double MemoryModelSSD::writePagesRandom(size_t pages) noexcept(true)
 
     touchedBytes += pages * pageSize;
 
-    LOGGER_LOG_TRACE("writing pages(random) {}, took time {}", pages, time);
+    // LOGGER_LOG_TRACE("writing pages(random) {}, took time {}", pages, time);
     return time;
 }
 
@@ -23,7 +23,7 @@ double MemoryModelSSD::readPagesSeq(size_t pages) const noexcept(true)
 {
     const double time = static_cast<double>(pages) * readSeqTime;
 
-    LOGGER_LOG_TRACE("reading pages(seq) {}, took time {}", pages, time);
+    // LOGGER_LOG_TRACE("reading pages(seq) {}, took time {}", pages, time);
     return time;
 }
 
@@ -33,7 +33,7 @@ double MemoryModelSSD::writePagesSeq(size_t pages) noexcept(true)
 
     touchedBytes += pages * pageSize;
 
-    LOGGER_LOG_TRACE("writing pages(seq) {}, took time {}", pages, time);
+    // LOGGER_LOG_TRACE("writing pages(seq) {}, took time {}", pages, time);
     return time;
 }
 
@@ -53,7 +53,7 @@ double MemoryModelSSD::eraseBlocks(size_t blocks) noexcept(true)
     const double time = static_cast<double>(blocks) * eraseTime;
     dirtyPages -= pagesInBlock * blocks;
 
-    LOGGER_LOG_TRACE("erasing blocks {}, took time {}", blocks, time);
+    // LOGGER_LOG_TRACE("erasing blocks {}, took time {}", blocks, time);
     return time;
 }
 

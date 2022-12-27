@@ -92,26 +92,26 @@ double MemoryController::flushCache() noexcept(true)
     if (writeCache.size() > 0)
         bytesToWrite = writeCacheLineSize;
 
-    auto buildStringFromPageQueue = [](const std::string &accumulator, const size_t &page)
-    {
-        return accumulator.empty() ? std::to_string(page) : accumulator + "," + std::to_string(page);
-    };
+    // auto buildStringFromPageQueue = [](const std::string &accumulator, const size_t &page)
+    // {
+    //     return accumulator.empty() ? std::to_string(page) : accumulator + "," + std::to_string(page);
+    // };
 
-    const std::string writeQueueString = std::accumulate(std::begin(writeCache), std::end(writeCache), std::string(), buildStringFromPageQueue);
-    LOGGER_LOG_DEBUG("Flushing write queue: [{}] ...", writeQueueString);
+    // const std::string writeQueueString = std::accumulate(std::begin(writeCache), std::end(writeCache), std::string(), buildStringFromPageQueue);
+    // LOGGER_LOG_DEBUG("Flushing write queue: [{}] ...", writeQueueString);
 
     std::sort(writeCache.begin(), writeCache.end());
     for (size_t i = 1; i < writeCache.size(); ++i)
         // still contiguous memory
         if (writeCache[i - 1] + 1 == writeCache[i])
         {
-            LOGGER_LOG_TRACE("Write queue page {:d} is still in contuguous area", i);
+            // LOGGER_LOG_TRACE("Write queue page {:d} is still in contuguous area", i);
             bytesToWrite += writeCacheLineSize;
         }
         else // memory gap, need to write pages in Queue
         {
             const double flushTime = memoryModel->writeBytes(bytesToWrite);
-            LOGGER_LOG_TRACE("Write queue page{:d} broke memory area, writing {:d} bytes took {}s", i, bytesToWrite, flushTime);
+            // LOGGER_LOG_TRACE("Write queue page{:d} broke memory area, writing {:d} bytes took {}s", i, bytesToWrite, flushTime);
 
             counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME, flushTime);
             counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS, 1);
@@ -126,7 +126,7 @@ double MemoryController::flushCache() noexcept(true)
     if (bytesToWrite > 0)
     {
         const double flushTime = memoryModel->writeBytes(bytesToWrite);
-        LOGGER_LOG_TRACE("Write queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushTime);
+        // LOGGER_LOG_TRACE("Write queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushTime);
 
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_TIME, flushTime);
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_WRITE_TOTAL_OPERATIONS, 1);
@@ -135,7 +135,7 @@ double MemoryController::flushCache() noexcept(true)
         flushWriteTime += flushTime;
     }
 
-    LOGGER_LOG_DEBUG("Write queue flushed, took {}s", flushWriteTime);
+    // LOGGER_LOG_DEBUG("Write queue flushed, took {}s", flushWriteTime);
 
     // flush overwrite Queue
     bytesToWrite = 0;
@@ -153,7 +153,7 @@ double MemoryController::flushCache() noexcept(true)
             // fetch page before overwrite
             if (overwriteCache[i].second[logicalAddr] == false && std::find(readCache.begin(), readCache.end(), readCacheLineIndex) == readCache.end())
             {
-                LOGGER_LOG_TRACE("Overwritting page {:d} logical address {:d}, add {:d} bytes to read before overwrite", i, logicalAddr, readCacheLineSize);
+                // LOGGER_LOG_TRACE("Overwritting page {:d} logical address {:d}, add {:d} bytes to read before overwrite", i, logicalAddr, readCacheLineSize);
                 bytesToRead += readCacheLineSize;
                 // go to the next page
                 logicalAddr = (addrToCacheLineIndex(logicalAddr, readCacheLineSize) + 1) * readCacheLineSize;
@@ -172,20 +172,20 @@ double MemoryController::flushCache() noexcept(true)
 
     std::sort(overwriteCache.begin(), overwriteCache.end());
 
-    auto buildStringFromPageMapQueueDebug = [](const std::string &accumulator, const std::pair<size_t, std::vector<bool>> &pair)
-    {
-        return accumulator.empty() ? std::to_string(pair.first) : accumulator + "," + std::to_string(pair.first);
-    };
+    // auto buildStringFromPageMapQueueDebug = [](const std::string &accumulator, const std::pair<size_t, std::vector<bool>> &pair)
+    // {
+    //     return accumulator.empty() ? std::to_string(pair.first) : accumulator + "," + std::to_string(pair.first);
+    // };
 
     // to debug print only pages, to trace print also pageMap
-    const std::string overwriteQueueStringDebug = std::accumulate(std::begin(overwriteCache), std::end(overwriteCache), std::string(), buildStringFromPageMapQueueDebug);
-    LOGGER_LOG_DEBUG("Flushing overwrite queue: [{}] ...", overwriteQueueStringDebug);
+    // const std::string overwriteQueueStringDebug = std::accumulate(std::begin(overwriteCache), std::end(overwriteCache), std::string(), buildStringFromPageMapQueueDebug);
+    // LOGGER_LOG_DEBUG("Flushing overwrite queue: [{}] ...", overwriteQueueStringDebug);
 
     for (size_t i = 1; i < overwriteCache.size(); ++i)
         // still contiguous memory
         if (overwriteCache[i - 1].first + 1 == overwriteCache[i].first)
         {
-            LOGGER_LOG_TRACE("Overwrite queue page {:d} is still in contuguous area", i);
+            // LOGGER_LOG_TRACE("Overwrite queue page {:d} is still in contuguous area", i);
             bytesToWrite += writeCacheLineSize;
             bytesToRead += addBytesToRead(i);
         }
@@ -196,7 +196,7 @@ double MemoryController::flushCache() noexcept(true)
             const double flushTime = flushReadTime + flushWriteTime;
             flushOverWriteTime += flushTime;
 
-            LOGGER_LOG_TRACE("Overwrite queue page{:d} broke memory area, reading {:d} bytes, writing {:d} bytes took {}s", i, bytesToRead, bytesToWrite, flushTime);
+            // LOGGER_LOG_TRACE("Overwrite queue page{:d} broke memory area, reading {:d} bytes, writing {:d} bytes took {}s", i, bytesToRead, bytesToWrite, flushTime);
 
             counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_TIME, flushReadTime);
             counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 1);
@@ -220,7 +220,7 @@ double MemoryController::flushCache() noexcept(true)
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_OPERATIONS, 1);
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_OVERWRITE_TOTAL_BYTES, bytesToWrite);
 
-        LOGGER_LOG_TRACE("Overwrite queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushWriteTime);
+        // LOGGER_LOG_TRACE("Overwrite queue writing last pages {:d} bytes took {}s",  bytesToWrite, flushWriteTime);
     }
 
     if (bytesToRead > 0)
@@ -232,10 +232,10 @@ double MemoryController::flushCache() noexcept(true)
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 1);
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES, bytesToRead);
 
-        LOGGER_LOG_TRACE("Overwrite queue reading last pages {:d} bytes took {}s", bytesToRead, flushReadTime);
+        // LOGGER_LOG_TRACE("Overwrite queue reading last pages {:d} bytes took {}s", bytesToRead, flushReadTime);
     }
 
-    LOGGER_LOG_DEBUG("Overwrite queue flushed, took {}s", flushOverWriteTime);
+    // LOGGER_LOG_DEBUG("Overwrite queue flushed, took {}s", flushOverWriteTime);
 
     // clear cache
     readCache.clear();
@@ -264,15 +264,15 @@ double MemoryController::readBytes(uintptr_t addr, size_t bytes) noexcept(true)
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_OPERATIONS, 1);
         counters.pegCounter(MemoryCounters::MEMORY_COUNTER_RW_READ_TOTAL_BYTES, bytesToRead);
 
-        const std::string readQueueString = std::accumulate(std::begin(readQueue),
-                                                            std::end(readQueue),
-                                                            std::string(),
-                                                            [](const std::string &accumulator, const size_t &page)
-                                                            {
-                                                                return accumulator.empty() ? std::to_string(page) : accumulator + "," + std::to_string(page);
-                                                            });
+        // const std::string readQueueString = std::accumulate(std::begin(readQueue),
+        //                                                     std::end(readQueue),
+        //                                                     std::string(),
+        //                                                     [](const std::string &accumulator, const size_t &page)
+        //                                                     {
+        //                                                         return accumulator.empty() ? std::to_string(page) : accumulator + "," + std::to_string(page);
+        //                                                     });
 
-        LOGGER_LOG_DEBUG("Fetching readQueue: [{}] to cache, took {}s", readQueueString, time);
+        // LOGGER_LOG_DEBUG("Fetching readQueue: [{}] to cache, took {}s", readQueueString, time);
         readCache.insert(readCache.end(), readQueue.begin(), readQueue.end());
         readQueue.clear();
 
@@ -283,12 +283,12 @@ double MemoryController::readBytes(uintptr_t addr, size_t bytes) noexcept(true)
         // CacheLine not fetched yet, add cacheLine to Queue
         if (std::find(readCache.begin(), readCache.end(), i) == readCache.end())
         {
-            LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... did not found, add to readQueue", i);
+            // LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... did not found, add to readQueue", i);
             readQueue.push_back(i);
         }
         else // cacheLine already fetched, so we break contiguous memory region, fetch all lines from queue
         {
-            LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... found in cache", i);
+            // LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... found in cache", i);
             if (readQueue.size() != 0)
                 time += addPageToReadCache();
         }
@@ -310,12 +310,12 @@ double MemoryController::writeBytes(uintptr_t addr, size_t bytes) noexcept(true)
     for (size_t i = cacheLineStartIndex; i <= cacheLineEndIndex; ++i)
         if (std::find(writeCache.begin(), writeCache.end(), i) == writeCache.end())
         {
-            LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... did not found, add to writeQueue", i);
+            // LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... did not found, add to writeQueue", i);
             writeCache.push_back(i);
         }
         else
         {
-            LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... found in cache", i);
+            // LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... found in cache", i);
         }
 
     // waiting for flushing the cache, so now only  add to queue (cost 0)
@@ -335,7 +335,7 @@ double MemoryController::overwriteBytes(uintptr_t addr, size_t bytes) noexcept(t
         auto cacheIt = std::find_if(overwriteCache.begin(), overwriteCache.end(), [i](const std::pair<size_t, std::vector<bool>>& elem){ return elem.first == i; });
         if (cacheIt == overwriteCache.end())
         {
-            LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... did not found, add to overwriteQueue", i);
+            // LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... did not found, add to overwriteQueue", i);
             std::vector<bool> emptyPage = std::vector<bool>(writeCacheLineSize, false);
             std::pair<size_t, std::vector<bool>> pageMapPair = std::make_pair(i, emptyPage);
             overwriteCache.push_back(pageMapPair);
@@ -343,7 +343,7 @@ double MemoryController::overwriteBytes(uintptr_t addr, size_t bytes) noexcept(t
         }
         else
         {
-            LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... found in cache", i);
+            // LOGGER_LOG_DEBUG("CacheLine(page) {:d} requested ... found in cache", i);
         }
 
         std::vector<bool> pageMap = (*cacheIt).second;
