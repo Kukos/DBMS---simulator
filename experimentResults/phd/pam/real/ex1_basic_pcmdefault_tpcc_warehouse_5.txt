@@ -1,0 +1,2 @@
+Adaptive Merging	extendend Adaptive Merging	PCM Adaptive Merging
+156.695590	69.518214	37.619848

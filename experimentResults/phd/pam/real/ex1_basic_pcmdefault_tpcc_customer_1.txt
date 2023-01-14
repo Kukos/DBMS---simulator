@@ -1,0 +1,2 @@
+Adaptive Merging	extendend Adaptive Merging	PCM Adaptive Merging
+905.396585	313.388092	223.056631

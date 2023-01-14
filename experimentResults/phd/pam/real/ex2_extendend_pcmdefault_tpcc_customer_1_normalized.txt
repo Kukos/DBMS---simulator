@@ -1,0 +1,4 @@
+Workload	Adaptive Merging	extendend Adaptive Merging	PCM Adaptive Merging
+ZR_{A}	4.002388	1.397487	1.000000
+ZR_{B}	4.655000	1.425297	1.000000
+ZR_{D}	3.908112	1.230118	1.000000

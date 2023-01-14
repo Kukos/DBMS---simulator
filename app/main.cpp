@@ -9,6 +9,9 @@ extern void experimentPhdFATree();
 extern void experimentPhdFALSMTree();
 extern void experimentPhdCFDTree();
 extern void experimentPhdLAM();
+extern void experimentPhdPAM();
+
+
 int main()
 {
     loggerStart();
@@ -22,7 +25,9 @@ int main()
     // experimentPhdFATree();
     // experimentPhdFALSMTree();
     // experimentPhdCFDTree();
-    experimentPhdLAM();
+    // experimentPhdLAM();
+    experimentPhdPAM();
+
 
     DBThreadPool::threadPool.wait_for_tasks();
 
